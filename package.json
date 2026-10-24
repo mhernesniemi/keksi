@@ -1,6 +1,6 @@
 {
   "name": "keksi",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lean cookie consent for Google and Meta trackers",
   "license": "MIT",
   "type": "module",
