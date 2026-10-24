@@ -5,7 +5,7 @@ export const css = [
   ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem;display:flex;flex-direction:column;max-width:34rem;max-height:calc(100vh - 2rem);margin-inline:auto;overflow:hidden}',
   ':where(.keksi,.keksi-main,.keksi-settings)[hidden]{display:none}',
   '@keyframes keksi-in{from{translate:0 8px}}',
-  '@media (prefers-reduced-motion:no-preference){:where(.keksi){transition:opacity .2s ease,translate .2s ease,scale .2s ease,display .2s allow-discrete}:where(.keksi:not([hidden])){animation:keksi-in .2s ease}:where(.keksi[hidden]){opacity:0;translate:0 8px;scale:.98}}',
+  '@media (prefers-reduced-motion:no-preference){:where(.keksi){transition:opacity .2s ease,translate .2s ease,scale .2s ease,display .2s allow-discrete}:where(.keksi:not([hidden])){animation:keksi-in .2s ease}:where(.keksi[hidden]){opacity:0;translate:0 8px;scale:.96}}',
   ':where(.keksi-main,.keksi-settings){display:flex;flex-direction:column;min-height:0;margin:0}',
   ':where(.keksi:has(.keksi-settings:not([hidden]))){max-width:40rem}',
   ':where(.keksi-settings .keksi-body){padding-block:0}',
