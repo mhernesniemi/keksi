@@ -1,0 +1,20 @@
+---
+import { renderKeksi } from 'keksi';
+import config from '../../keksi.config';
+
+const { title } = Astro.props;
+---
+
+<html lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Fragment set:html={renderKeksi(config, { lang: 'fi' })} />
+    <nav><a href="/">Etusivu</a> · <a href="/evasteet">Evästeet</a></nav>
+    <main><slot /></main>
+    <footer><button type="button" data-keksi-open>Evästeasetukset</button></footer>
+  </body>
+</html>

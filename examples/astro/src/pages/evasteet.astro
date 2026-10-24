@@ -1,0 +1,10 @@
+---
+import { cookieTable } from 'keksi';
+import config from '../../keksi.config';
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Evästeet">
+  <h1>Evästekäytäntö</h1>
+  <Fragment set:html={cookieTable(config, { lang: 'fi' })} />
+</Base>

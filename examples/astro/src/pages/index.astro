@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Esimerkki">
+  <h1>Esimerkki Oy</h1>
+  <p>Sivusto, jossa on Google Analytics, Google Ads, Meta Pixel ja YouTube-video.</p>
+  <keksi-youtube video="aqz-KE-bpKQ" label="Big Buck Bunny"></keksi-youtube>
+  <button id="lead" type="button">Lähetä yhteydenotto</button>
+  <script is:inline>
+    document.getElementById('lead').onclick = () => gtag('event', 'generate_lead');
+  </script>
+</Base>
