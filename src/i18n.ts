@@ -3,7 +3,6 @@ import type { Locale } from './types.js';
 const fi = {
   title: 'Evästeet',
   intro: 'Käytämme välttämättömien evästeiden lisäksi seuraavia palveluita vain, jos annat siihen luvan:',
-  transfer: 'Palveluntarjoajat voivat siirtää tietoja Yhdysvaltoihin.',
   change: 'Voit muuttaa valintaasi milloin tahansa.',
   more: 'Lue lisää',
   accept: 'Hyväksy kaikki',
@@ -45,7 +44,6 @@ export type Texts = typeof fi;
 const sv: Texts = {
   title: 'Kakor',
   intro: 'Utöver nödvändiga kakor använder vi följande tjänster endast om du ger ditt samtycke:',
-  transfer: 'Tjänsteleverantörerna kan överföra uppgifter till USA.',
   change: 'Du kan ändra ditt val när som helst.',
   more: 'Läs mer',
   accept: 'Godkänn alla',
@@ -85,7 +83,6 @@ const sv: Texts = {
 const en: Texts = {
   title: 'Cookies',
   intro: 'Besides necessary cookies, we use the following services only if you allow it:',
-  transfer: 'The providers may transfer data to the United States.',
   change: 'You can change your choice at any time.',
   more: 'Read more',
   accept: 'Accept all',

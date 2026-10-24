@@ -32,7 +32,7 @@ export function renderKeksi(config: KeksiConfig, { lang = 'fi', nonce }: RenderO
     `<style${n}>${css}</style>` +
     `<section id="keksi-banner" class="keksi" aria-labelledby="keksi-title" hidden>` +
     `<h2 id="keksi-title">${e(t.title)}</h2><p>${e(t.intro)}</p><ul>${uses}</ul>` +
-    `<p>${active.some((p) => p.transfer) ? `${e(t.transfer)} ` : ''}${e(t.change)}${policy ? ` <a href="${e(policy)}">${e(t.more)}</a>` : ''}</p>` +
+    `<p>${e(t.change)}${policy ? ` <a href="${e(policy)}">${e(t.more)}</a>` : ''}</p>` +
     `<div class="keksi-actions">${btn('accept', t.accept)}${btn('reject', t.reject)}` +
     `<button type="button" class="keksi-btn" data-keksi-open>${e(t.settings)}</button></div></section>` +
     `<dialog id="keksi-dialog" class="keksi-dialog" aria-labelledby="keksi-dialog-title"><form method="dialog">` +

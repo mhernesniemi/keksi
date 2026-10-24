@@ -67,13 +67,13 @@ describe('render', () => {
     expect(version(config)).toBe(version({ ga: 'G-1' }));
   });
 
-  it('discloses PostHog and the US transfer only for the US host', () => {
+  it('discloses PostHog, with the US transfer in the settings for the US host', () => {
     const eu = renderKeksi({ posthog: { key: 'phc_1' } }, { lang: 'en' });
     expect(eu).toContain('<li><strong>Analytics:</strong> PostHog</li>');
     expect(eu).toContain('<code>ph_*_posthog</code>');
     expect(eu.replace(/<script[\s\S]*$/, '')).not.toContain('United States');
     const us = renderKeksi({ posthog: { key: 'phc_1', host: 'https://us.i.posthog.com' } }, { lang: 'en' });
-    expect(us).toContain('The providers may transfer data to the United States.');
+    expect(us).toContain('<p>You can change your choice at any time.');
     expect(us).toContain('<p>Data is transferred to the United States.</p>');
   });
 

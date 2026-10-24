@@ -1,12 +1,14 @@
-// Zero specificity, so any site rule wins. Theme with --keksi-bg, --keksi-fg, --keksi-line, --keksi-radius, --keksi-focus.
+// Zero specificity, so any site rule wins; only link underlines are stronger, to survive CSS resets. Theme with --keksi-bg, --keksi-fg, --keksi-line, --keksi-radius, --keksi-focus.
 export const css = [
   ':where(.keksi,.keksi-dialog){--_bg:var(--keksi-bg,#fff);--_fg:var(--keksi-fg,#1b1b1b);--_line:var(--keksi-line,#c8c8c8);--_r:var(--keksi-radius,6px);box-sizing:border-box;background:var(--_bg);color:var(--_fg);font:inherit;font-size:15px;line-height:1.5}',
   ':where(.keksi-policy){--_line:var(--keksi-line,#c8c8c8)}',
-  ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem;max-width:34rem;max-height:calc(100vh - 2rem);overflow:auto;margin-inline:auto;padding:1.25rem;border:1px solid var(--_line);border-radius:var(--_r);box-shadow:0 4px 24px #0003}',
+  ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem;max-width:34rem;max-height:calc(100vh - 2rem);overflow:auto;margin-inline:auto;padding:1.25rem;font-size:14px;border:1px solid var(--_line);border-radius:var(--_r);box-shadow:0 4px 24px #0003}',
   ':where(.keksi,.keksi-dialog) :where(h2){font-size:1.125rem;margin:0 0 .5rem}',
+  ':where(.keksi) :where(h2){font-size:1rem}',
   ':where(.keksi) :where(p,ul){margin:0 0 .75rem}',
   ':where(.keksi) :where(ul){padding-left:1.25rem}',
   ':where(.keksi,.keksi-dialog) :where(a){color:inherit}',
+  '.keksi a,.keksi-dialog a{text-decoration:underline}',
   ':where(.keksi-actions){display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}',
   ':where(.keksi-btn){flex:1 1 auto;font:inherit;font-weight:600;padding:.6rem 1rem;border:1px solid var(--_fg);border-radius:var(--_r);background:var(--_bg);color:var(--_fg);cursor:pointer}',
   ':where(.keksi-btn:hover){background:var(--_fg);color:var(--_bg)}',
