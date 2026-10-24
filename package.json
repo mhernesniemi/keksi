@@ -1,6 +1,6 @@
 {
   "name": "keksi",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Superlight cookie consent for modern web frameworks",
   "keywords": [
     "cookie consent",
