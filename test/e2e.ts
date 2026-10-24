@@ -5,7 +5,7 @@ import type { KeksiConfig } from '../src/types.js';
 /** Shared browser tests for the examples. */
 export function consentSuite(config: KeksiConfig): void {
   test.beforeEach(async ({ page }) => {
-    await page.route(/googletagmanager|google-analytics|doubleclick|facebook|youtube|ytimg/, (r) => r.fulfill({ status: 204 }));
+    await page.route(/googletagmanager|google-analytics|doubleclick|facebook|posthog|youtube|ytimg/, (r) => r.fulfill({ status: 204 }));
   });
 
   test('nothing tracks before a decision', async ({ page }) => {
@@ -35,6 +35,7 @@ export function consentSuite(config: KeksiConfig): void {
     const loaded = [
       'https://www.googletagmanager.com/gtag/js?id=G-TEST123',
       'https://connect.facebook.net/en_US/fbevents.js',
+      'https://eu-assets.i.posthog.com/static/array.js',
     ];
     await expect.poll(() => tracking.requests).toEqual([...loaded, 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ']);
     tracking.requests.length = 0;
@@ -64,7 +65,10 @@ export function consentSuite(config: KeksiConfig): void {
     await dialog.getByRole('switch', { name: 'Analytiikka' }).check();
     await dialog.getByRole('button', { name: 'Tallenna valinnat' }).click();
     await expect(dialog).toBeHidden();
-    await expect.poll(() => tracking.requests).toEqual(['https://www.googletagmanager.com/gtag/js?id=G-TEST123']);
+    await expect.poll(() => tracking.requests).toEqual([
+      'https://www.googletagmanager.com/gtag/js?id=G-TEST123',
+      'https://eu-assets.i.posthog.com/static/array.js',
+    ]);
   });
 
   test('withdrawing deletes first-party cookies and reloads', async ({ page, context, baseURL }) => {
@@ -98,8 +102,8 @@ export function consentSuite(config: KeksiConfig): void {
 
   test('the policy page lists every cookie', async ({ page }) => {
     await page.goto('/evasteet');
-    for (const name of ['keksi', '_ga', '_gcl_au', 'IDE', '_fbp', 'VISITOR_INFO1_LIVE']) {
-      await expect(page.locator('.keksi-policy code', { hasText: new RegExp(`^${name}$`) })).toBeVisible();
+    for (const name of ['keksi', 'ph_*_posthog', '_ga', '_gcl_au', 'IDE', '_fbp', 'VISITOR_INFO1_LIVE']) {
+      await expect(page.locator('.keksi-policy code').getByText(name, { exact: true }).first()).toBeVisible();
     }
   });
 

@@ -2,7 +2,7 @@ import type { Texts } from './i18n.js';
 
 export type Locale = 'fi' | 'sv' | 'en';
 export type Category = 'analytics' | 'marketing';
-export type ProviderId = 'ga' | 'googleAds' | 'meta' | 'youtube';
+export type ProviderId = 'ga' | 'googleAds' | 'meta' | 'posthog' | 'youtube';
 export type Consent = Record<Category, boolean>;
 
 export interface KeksiConfig {
@@ -12,6 +12,8 @@ export interface KeksiConfig {
   googleAds?: string | string[];
   /** Meta Pixel ids. */
   meta?: string | string[];
+  /** PostHog project token and ingestion host (default `https://eu.i.posthog.com`). */
+  posthog?: { key: string; host?: string };
   /** Enables `<keksi-youtube>` embeds. */
   youtube?: boolean;
   /** Cookie policy page, linked from the banner. */
@@ -45,7 +47,7 @@ export interface CookieInfo {
   duration: Duration;
   /** Third-party host that sets it. Omitted = set on this site, deleted on withdrawal. */
   host?: string;
-  storage?: 'localStorage';
+  storage?: 'localStorage' | 'sessionStorage';
 }
 
 export interface Provider {
@@ -55,8 +57,8 @@ export interface Provider {
   company: string;
   privacyPolicy: string;
   purpose: Record<Locale, string>;
-  /** Transfer outside the EU and its legal basis. */
-  transfer?: 'dpf';
+  /** Transfer outside the EU: under the DPF, or to the US with no basis stated. */
+  transfer?: 'dpf' | 'us';
   cookies: CookieInfo[];
   /** Hosts it contacts, for the Playwright check. */
   hosts: string[];
@@ -71,8 +73,9 @@ export interface RuntimeData {
   ga: string[];
   ads: string[];
   meta: string[];
+  ph?: { key: string; host: string };
   yt: boolean;
-  /** First-party cookie and localStorage names per category, `*` suffix = prefix. */
+  /** First-party cookie and storage names per category, `*` = wildcard. */
   del: Record<Category, string[]>;
   t: Pick<Texts, 'ytText' | 'ytButton' | 'ytOpen'>;
 }

@@ -1,3 +1,4 @@
+import { glob } from './glob.js';
 import { providers } from './providers.js';
 import type { NecessaryCookie } from './types.js';
 
@@ -17,7 +18,7 @@ const SECURITY = known(
   'Skyddar webbplatsen mot botar och attacker.',
 );
 
-/** Purposes for common framework and hosting cookies. `*` suffix = prefix. */
+/** Purposes for common framework and hosting cookies. `*` = wildcard. */
 const purposes: Record<string, NecessaryCookie['purpose']> = {
   NEXT_LOCALE: known('Remembers your language.', 'Muistaa valitsemasi kielen.', 'Kommer ihåg ditt språk.'),
   'next-auth.session-token': SESSION,
@@ -42,8 +43,7 @@ const purposes: Record<string, NecessaryCookie['purpose']> = {
 
 const trackerNames = providers.flatMap((p) => p.cookies.flatMap((c) => c.name.split(', ')));
 const trackerHosts = providers.flatMap((p) => p.hosts);
-const matches = (patterns: string[], name: string) =>
-  patterns.some((p) => (p.endsWith('*') ? name.startsWith(p.slice(0, -1)) : name === p));
+const matches = (patterns: string[], name: string) => patterns.some((p) => glob(p, name));
 
 export function purposeOf(name: string): NecessaryCookie['purpose'] | undefined {
   const k = Object.keys(purposes).find((p) => matches([p], name));

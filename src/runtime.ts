@@ -1,3 +1,4 @@
+import { glob } from './glob.js';
 import type { Category, Consent, RuntimeData } from './types.js';
 
 export interface KeksiApi {
@@ -21,6 +22,7 @@ declare global {
     gtag?: (...a: unknown[]) => void;
     fbq?: Queue;
     _fbq?: Queue;
+    posthog?: unknown[] & Record<string, unknown> & { _i: unknown[] };
   }
 }
 
@@ -42,6 +44,7 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
   let state = read();
   let gtagLoaded = false;
   let metaLoaded = false;
+  let posthogLoaded = false;
   const configured = new Set<string>();
 
   const consentDefault = args('consent', 'default', {
@@ -65,6 +68,14 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     w.fbq = w._fbq = f;
   }
 
+  if (d.ph) {
+    // Same queue shape as PostHog's snippet; array.js replays it after consent.
+    const ph = Object.assign([], { _i: [], people: [] }) as unknown as NonNullable<Window['posthog']>;
+    for (const m of 'capture identify alias reset register register_once unregister group setPersonProperties getFeatureFlag isFeatureEnabled onFeatureFlags reloadFeatureFlags get_distinct_id startSessionRecording stopSessionRecording captureException on'.split(' '))
+      ph[m] = (...a: unknown[]) => ph.push([m, ...a]);
+    w.posthog = ph;
+  }
+
   function read(): { id: string; c: Consent } | null {
     const raw = doc.cookie
       .split('; ')
@@ -86,11 +97,12 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     return { id, c };
   }
 
-  function script(src: string): void {
+  function script(src: string): HTMLScriptElement {
     const s = doc.createElement('script');
     s.async = true;
     s.src = src;
     doc.head.append(s);
+    return s;
   }
 
   function load(c: Consent): void {
@@ -121,12 +133,17 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       w.fbq!.queue.unshift(...d.meta.map((id) => args('init', id)), args('track', 'PageView'));
       script('https://connect.facebook.net/en_US/fbevents.js');
     }
+    if (c.analytics && d.ph && !posthogLoaded) {
+      posthogLoaded = true;
+      w.posthog!._i.push([d.ph.key, { api_host: d.ph.host, defaults: '2026-08-30' }, 'posthog']);
+      script(`${d.ph.host.replace('.i.posthog.com', '-assets.i.posthog.com')}/static/array.js`).crossOrigin = 'anonymous';
+    }
     if (c.marketing) for (const el of doc.querySelectorAll<YouTube>('keksi-youtube')) el.show(true);
   }
 
   function clean(cats: Category[]): void {
     const names = cats.flatMap((c) => d.del[c]);
-    const hit = (n: string) => names.some((p) => (p.endsWith('*') ? n.startsWith(p.slice(0, -1)) : n === p));
+    const hit = (n: string) => names.some((p) => glob(p, n));
     const parts = w.location.hostname.split('.');
     const domains = ['', ...parts.map((_, i) => `; Domain=${parts.slice(i).join('.')}`)];
     for (const c of doc.cookie.split('; ')) {
@@ -134,7 +151,8 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       if (hit(n)) for (const dm of domains) doc.cookie = `${n}=; Max-Age=0; Path=/${dm}`;
     }
     try {
-      for (const k of Object.keys(w.localStorage)) if (hit(k)) w.localStorage.removeItem(k);
+      for (const store of [w.localStorage, w.sessionStorage])
+        for (const k of Object.keys(store)) if (hit(k)) store.removeItem(k);
     } catch {}
   }
 

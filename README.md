@@ -6,7 +6,7 @@ texts in English, Finnish and Swedish.
 keksi loads the trackers itself, and only after consent. You don't add their script tags: you put their ids in the
 config, so there's nothing to block.
 
-- Google Analytics 4, Google Ads, Meta Pixel and YouTube. The short list is deliberate.
+- Google Analytics 4, Google Ads, Meta Pixel, PostHog and YouTube. The short list is deliberate.
 - About 5 KB gzipped, inline. No extra requests, no dependencies.
 - Rendered on the server. Works on static pages, with no layout shift.
 - The cookie policy table is generated from the same data.
@@ -25,6 +25,7 @@ export default defineConfig({
   ga: 'G-XXXXXXX',
   googleAds: 'AW-123456789',
   meta: '1234567890',
+  posthog: { key: 'phc_XXXX' }, // EU cloud by default; set host for US or a proxy
   youtube: true,
   policyUrl: '/evasteet',
 });
@@ -82,16 +83,18 @@ string.
 
 ## Tracking events
 
-`gtag()` and `fbq()` are always defined, so you can call them anytime:
+`gtag()`, `fbq()` and `posthog` are always defined, so you can call them anytime:
 
 ```ts
 gtag('event', 'generate_lead');
 fbq('track', 'Lead');
+posthog.capture('signup');
 ```
 
 - Calls made before consent are queued. They're sent only if the visitor consents on that page.
 - Google gets Consent Mode v2 signals (basic mode).
-- GA4 and Meta Pixel track single-page navigation themselves.
+- GA4, Meta Pixel and PostHog track single-page navigation themselves.
+- PostHog counts as analytics. With the US host, the settings say data is transferred to the US.
 
 ## YouTube
 

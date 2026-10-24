@@ -137,3 +137,45 @@ describe('runtime', () => {
     );
   });
 });
+
+describe('posthog', () => {
+  const ph: KeksiConfig = { posthog: { key: 'phc_test' } };
+  const phData = runtimeData(ph, 'en');
+
+  function boot2(cookie?: string) {
+    const w = new HappyWindow({ url: 'https://www.example.fi/' }) as unknown as Window & typeof globalThis;
+    if (cookie) w.document.cookie = `${cookie}; Path=/`;
+    Object.defineProperty(w.location, 'reload', { value: vi.fn() });
+    const api = boot(phData, w);
+    return { w, api, scripts: () => [...w.document.head.querySelectorAll('script')].map((s) => s.src) };
+  }
+
+  it('queues calls until analytics consent, then loads from the EU host', () => {
+    const { w, api, scripts } = boot2();
+    (w.posthog!.capture as (...a: unknown[]) => void)('signup', { plan: 'pro' });
+    expect(scripts()).toEqual([]);
+    api.save({ analytics: true });
+    expect(scripts()).toEqual(['https://eu-assets.i.posthog.com/static/array.js']);
+    expect(w.posthog!._i).toEqual([['phc_test', { api_host: 'https://eu.i.posthog.com', defaults: '2026-08-30' }, 'posthog']]);
+    expect([...w.posthog!]).toEqual([['capture', 'signup', { plan: 'pro' }]]);
+  });
+
+  it('stays unloaded with marketing only', () => {
+    const { api, scripts } = boot2();
+    api.save({ marketing: true });
+    expect(scripts()).toEqual([]);
+  });
+
+  it('deletes its cookie and storage on withdrawal', () => {
+    const { w, api } = boot2(`keksi=${phData.v}.x.abc.a`);
+    w.document.cookie = 'ph_phc_test_posthog=%7B%7D; Path=/';
+    w.localStorage.setItem('ph_phc_test_posthog', '{}');
+    w.sessionStorage.setItem('ph_phc_test_window_id', 'w');
+    w.localStorage.setItem('other', 'keep');
+    api.rejectAll();
+    expect(w.document.cookie).not.toMatch(/ph_phc_test_posthog=%7B/);
+    expect(w.localStorage.getItem('ph_phc_test_posthog')).toBeNull();
+    expect(w.sessionStorage.getItem('ph_phc_test_window_id')).toBeNull();
+    expect(w.localStorage.getItem('other')).toBe('keep');
+  });
+});

@@ -8,8 +8,14 @@ export function defineConfig(config: KeksiConfig): KeksiConfig {
 
 const list = (v?: string | string[]): string[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
 
+const posthogHost = (config: KeksiConfig) => (config.posthog?.host ?? 'https://eu.i.posthog.com').replace(/\/$/, '');
+
 export function activeProviders(config: KeksiConfig): Provider[] {
-  return providers.filter((p) => (p.id === 'youtube' ? config.youtube : list(config[p.id]).length));
+  return providers
+    .filter((p) =>
+      p.id === 'youtube' ? config.youtube : p.id === 'posthog' ? config.posthog?.key : list(config[p.id]).length,
+    )
+    .map((p) => (p.id === 'posthog' && /\/\/us\./.test(posthogHost(config)) ? { ...p, transfer: 'us' } : p));
 }
 
 export function categoriesOf(config: KeksiConfig): Category[] {
@@ -40,6 +46,7 @@ export function runtimeData(config: KeksiConfig, locale: Locale): RuntimeData {
     ga: list(config.ga),
     ads: list(config.googleAds),
     meta: list(config.meta),
+    ph: config.posthog?.key ? { key: config.posthog.key, host: posthogHost(config) } : undefined,
     yt: !!config.youtube,
     del: { analytics: del('analytics'), marketing: del('marketing') },
     t: { ytText: t.ytText, ytButton: t.ytButton, ytOpen: t.ytOpen },
