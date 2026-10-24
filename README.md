@@ -102,9 +102,13 @@ posthog.capture('signup');
 <keksi-youtube video="aqz-KE-bpKQ" label="Esittelyvideo" poster="/img/poster.jpg"></keksi-youtube>
 ```
 
-- Shows a placeholder until the visitor clicks it, then loads that one video from `youtube-nocookie.com`.
-- With marketing consent, videos load directly.
-- `poster` is optional and should be self-hosted. Thumbnails from YouTube would contact Google before consent.
+- Shows a YouTube-style placeholder. Clicking play is the consent: it's remembered, and all videos load from
+  `youtube-nocookie.com` from then on.
+- Marketing consent in the banner covers YouTube too, and turning it off withdraws YouTube.
+- With YouTube as the only provider, the banner doesn't show by itself. The `data-keksi-open` link still opens the
+  settings for withdrawing.
+- `poster` is optional and should be self-hosted. YouTube's thumbnails come from `i.ytimg.com`, which would contact
+  Google before consent.
 
 ## API
 

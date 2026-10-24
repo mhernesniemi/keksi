@@ -34,9 +34,9 @@ const fi = {
   mo: 'kuukausi|kuukautta',
   d: 'päivä|päivää',
   min: 'minuutti|minuuttia',
-  ytText: 'Video ladataan YouTubesta. YouTube (Google) asettaa evästeitä ja voi siirtää tietoja Yhdysvaltoihin.',
-  ytButton: 'Näytä video',
-  ytOpen: 'Avaa YouTubessa',
+  ytText: 'Toistamalla videon hyväksyt YouTuben evästeet.',
+  ytButton: 'Toista video',
+  ytOpen: 'Katso YouTubessa',
 };
 
 export type Texts = typeof fi;
@@ -75,9 +75,9 @@ const sv: Texts = {
   mo: 'månad|månader',
   d: 'dag|dagar',
   min: 'minut|minuter',
-  ytText: 'Videon laddas från YouTube. YouTube (Google) sätter kakor och kan överföra uppgifter till USA.',
-  ytButton: 'Visa video',
-  ytOpen: 'Öppna på YouTube',
+  ytText: 'Genom att spela upp videon godkänner du kakor från YouTube.',
+  ytButton: 'Spela upp video',
+  ytOpen: 'Titta på YouTube',
 };
 
 const en: Texts = {
@@ -114,9 +114,9 @@ const en: Texts = {
   mo: 'month|months',
   d: 'day|days',
   min: 'minute|minutes',
-  ytText: 'The video loads from YouTube. YouTube (Google) sets cookies and may transfer data to the United States.',
-  ytButton: 'Show video',
-  ytOpen: 'Open on YouTube',
+  ytText: 'By playing the video, you accept cookies from YouTube.',
+  ytButton: 'Play video',
+  ytOpen: 'Watch on YouTube',
 };
 
 export const texts: Record<Locale, Texts> = { fi, sv, en };

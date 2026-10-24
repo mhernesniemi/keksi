@@ -126,10 +126,53 @@ describe('runtime', () => {
     const el = w.document.querySelector('keksi-youtube')!;
     expect(el.querySelector('iframe')).toBeNull();
     const button = el.querySelector('button')!;
-    expect(button.getAttribute('aria-label')).toBe('Näytä video: Esittely');
+    expect(button.getAttribute('aria-label')).toBe('Toista video: Esittely');
     button.click();
     expect(el.querySelector('iframe')!.src).toBe('https://www.youtube-nocookie.com/embed/abc123?autoplay=1');
     expect(w.document.head.querySelectorAll('script')).toHaveLength(0);
+  });
+
+  it('links the placeholder to the policy and shows the poster', () => {
+    const { w } = setup(undefined, '<keksi-youtube video="abc123" poster="/p.jpg"></keksi-youtube>');
+    const box = w.document.querySelector<HTMLElement>('.keksi-yt')!;
+    expect(box.style.getPropertyValue('--keksi-poster')).toBe('url("/p.jpg")');
+    expect([...box.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual([
+      'https://www.youtube.com/watch?v=abc123',
+      '/evasteet',
+    ]);
+  });
+
+  it('remembers a click on a video without answering the banner', () => {
+    const body = '<keksi-youtube video="a"></keksi-youtube><keksi-youtube video="b"></keksi-youtube>';
+    const first = setup(undefined, body);
+    first.click('keksi-youtube button');
+    expect(first.w.document.querySelectorAll('keksi-youtube iframe')).toHaveLength(2);
+    expect(first.api.consent).toBeNull();
+    expect(first.banner().hidden).toBe(false);
+    expect(first.scripts()).toEqual([]);
+
+    const next = setup(first.w.document.cookie, body);
+    expect(next.w.document.querySelectorAll('keksi-youtube iframe')).toHaveLength(2);
+    next.click('#keksi-banner [data-keksi=reject]');
+    expect(next.reload).toHaveBeenCalled();
+  });
+
+  it('shows no banner with YouTube only, but opens the settings to withdraw', () => {
+    const yt: KeksiConfig = { youtube: true };
+    const w = new HappyWindow({ url: 'https://www.example.fi/' }) as unknown as Window & typeof globalThis;
+    w.document.body.innerHTML =
+      renderKeksi(yt).replace(/<script[\s\S]*<\/script>/, '') + '<keksi-youtube video="a"></keksi-youtube>';
+    Object.defineProperty(w.location, 'reload', { value: vi.fn() });
+    boot(runtimeData(yt, 'fi'), w);
+    const banner = w.document.getElementById('keksi-banner')!;
+    expect(banner.hidden).toBe(true);
+    w.document.querySelector<HTMLElement>('keksi-youtube button')!.click();
+    expect(w.document.cookie).toMatch(/^keksi=.*\.uy$/);
+    expect(banner.hidden).toBe(true);
+    w.keksi!.open();
+    expect(banner.hidden).toBe(false);
+    w.keksi!.rejectAll();
+    expect(w.location.reload).toHaveBeenCalled();
   });
 
   it('embeds YouTube directly with marketing consent', () => {

@@ -75,7 +75,10 @@ export interface RuntimeData {
   meta: string[];
   ph?: { key: string; host: string };
   yt: boolean;
+  /** False with YouTube only: the settings exist but the banner doesn't show by itself. */
+  banner: boolean;
+  policy?: string;
   /** First-party cookie and storage names per category, `*` = wildcard. */
   del: Record<Category, string[]>;
-  t: Pick<Texts, 'ytText' | 'ytButton' | 'ytOpen'>;
+  t: Pick<Texts, 'ytText' | 'ytButton' | 'ytOpen' | 'more'>;
 }

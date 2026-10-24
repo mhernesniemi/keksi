@@ -76,25 +76,29 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     w.posthog = ph;
   }
 
-  function read(): { id: string; c: Consent } | null {
+  /** `yt`: YouTube allowed, by marketing consent or a click on a video. `done`: the banner was answered. */
+  type State = { id: string; c: Consent; yt: boolean; done: boolean };
+
+  function read(): State | null {
     const raw = doc.cookie
       .split('; ')
       .find((c) => c.startsWith(`${d.name}=`))
       ?.slice(d.name.length + 1);
     const [v, , id, flags] = raw?.split('.') ?? [];
     if (v !== d.v || !id || !flags) return null;
-    return { id, c: { analytics: flags.includes('a'), marketing: flags.includes('m') } };
+    const c = { analytics: flags.includes('a'), marketing: flags.includes('m') };
+    return { id, c, yt: c.marketing || flags.includes('y'), done: !flags.includes('u') };
   }
 
-  function write(c: Consent): { id: string; c: Consent } {
+  function write(c: Consent, yt = c.marketing, done = true): State {
     const id =
       state?.id ?? Array.from(w.crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, '0')).join('');
-    const flags = (c.analytics ? 'a' : '') + (c.marketing ? 'm' : '') || '-';
+    const flags = (done ? '' : 'u') + (c.analytics ? 'a' : '') + (c.marketing ? 'm' : '') + (yt && !c.marketing ? 'y' : '') || '-';
     doc.cookie =
       `${d.name}=${d.v}.${Date.now().toString(36)}.${id}.${flags}; Path=/; Max-Age=${d.days * 86400}; SameSite=Lax` +
       (d.domain ? `; Domain=${d.domain}` : '') +
       (w.location.protocol === 'https:' ? '; Secure' : '');
-    return { id, c };
+    return { id, c, yt, done };
   }
 
   function script(src: string): HTMLScriptElement {
@@ -138,7 +142,12 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       w.posthog!._i.push([d.ph.key, { api_host: d.ph.host, defaults: '2026-08-30' }, 'posthog']);
       script(`${d.ph.host.replace('.i.posthog.com', '-assets.i.posthog.com')}/static/array.js`).crossOrigin = 'anonymous';
     }
-    if (c.marketing) for (const el of doc.querySelectorAll<YouTube>('keksi-youtube')) el.show(true);
+    if (state?.yt) for (const el of doc.querySelectorAll<YouTube>('keksi-youtube')) el.show(true);
+  }
+
+  function allowYouTube(): void {
+    if (!state?.yt) state = write(state?.c ?? NONE, true, state?.done ?? false);
+    load(state.c);
   }
 
   function clean(cats: Category[]): void {
@@ -157,18 +166,18 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
   }
 
   function save(c: Consent): void {
-    const prev = state?.c;
+    const prev = state;
     state = write(c);
     sync();
     doc.dispatchEvent(new w.CustomEvent('keksi:change', { detail: { ...c } }));
     clean(CATS.filter((k) => !c[k]));
     // Loaded tags can't be unloaded, so a withdrawal starts a clean page.
-    if (CATS.some((k) => prev?.[k] && !c[k])) w.location.reload();
+    if (CATS.some((k) => prev?.c[k] && !c[k]) || (prev?.yt && !state.yt)) w.location.reload();
     else load(c);
   }
 
   /** Shows the banner, the settings view in it, or neither. */
-  function view(settings = false, show = !state || settings): void {
+  function view(settings = false, show = (d.banner && !state?.done) || settings): void {
     const banner = $('keksi-banner');
     const form = $<HTMLFormElement>('keksi-settings');
     if (!banner || !form) return;
@@ -214,7 +223,7 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
 
   class YouTube extends w.HTMLElement {
     connectedCallback() {
-      this.show(!!state?.c.marketing);
+      this.show(!!state?.yt);
     }
 
     show(load: boolean, autoplay = false) {
@@ -235,20 +244,28 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       const box = doc.createElement('div');
       box.className = 'keksi-yt';
       const poster = this.getAttribute('poster');
-      if (poster) box.style.background = `linear-gradient(#000a,#000a),center/cover url(${JSON.stringify(poster)})`;
+      if (poster) box.style.setProperty('--keksi-poster', `url(${JSON.stringify(poster)})`);
       const text = doc.createElement('p');
       text.textContent = d.t.ytText;
       const button = doc.createElement('button');
       button.type = 'button';
       button.textContent = d.t.ytButton;
       if (label) button.setAttribute('aria-label', `${d.t.ytButton}: ${label}`);
-      button.onclick = () => this.show(true, true);
-      const link = doc.createElement('a');
-      link.href = `https://www.youtube.com/watch?v=${id}`;
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.textContent = d.t.ytOpen;
-      box.append(text, button, link);
+      button.onclick = () => {
+        this.show(true, true);
+        allowYouTube();
+      };
+      const links = doc.createElement('p');
+      const link = (href: string, label: string, blank = false) => {
+        const a = doc.createElement('a');
+        a.href = href;
+        a.textContent = label;
+        if (blank) (a.target = '_blank'), (a.rel = 'noopener');
+        links.append(links.childNodes.length ? ' · ' : '', a);
+      };
+      link(`https://www.youtube.com/watch?v=${id}`, d.t.ytOpen, true);
+      if (d.policy) link(d.policy, d.t.more);
+      box.append(text, button, links);
       this.replaceChildren(box);
     }
   }
@@ -256,7 +273,7 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
 
   const api: KeksiApi = {
     get consent() {
-      return state ? { ...state.c } : null;
+      return state?.done ? { ...state.c } : null;
     },
     open,
     save: (c) => save({ ...(state?.c ?? NONE), ...c }),

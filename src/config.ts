@@ -22,6 +22,15 @@ export function categoriesOf(config: KeksiConfig): Category[] {
   return (['analytics', 'marketing'] as const).filter((c) => activeProviders(config).some((p) => p.category === c));
 }
 
+/** False when YouTube is the only provider: a click on a video is the consent, so the banner doesn't show by itself. */
+export function needsBanner(config: KeksiConfig): boolean {
+  return activeProviders(config).some((p) => p.id !== 'youtube');
+}
+
+export function policyOf(config: KeksiConfig, locale: Locale): string | undefined {
+  return typeof config.policyUrl === 'string' ? config.policyUrl : config.policyUrl?.[locale];
+}
+
 export function textsFor(config: KeksiConfig, locale: Locale): Texts {
   return { ...texts[locale], ...config.texts?.[locale] };
 }
@@ -48,7 +57,9 @@ export function runtimeData(config: KeksiConfig, locale: Locale): RuntimeData {
     meta: list(config.meta),
     ph: config.posthog?.key ? { key: config.posthog.key, host: posthogHost(config) } : undefined,
     yt: !!config.youtube,
+    banner: needsBanner(config),
+    policy: policyOf(config, locale),
     del: { analytics: del('analytics'), marketing: del('marketing') },
-    t: { ytText: t.ytText, ytButton: t.ytButton, ytOpen: t.ytOpen },
+    t: { ytText: t.ytText, ytButton: t.ytButton, ytOpen: t.ytOpen, more: t.more },
   };
 }

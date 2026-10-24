@@ -1,4 +1,4 @@
-import { activeProviders, categoriesOf, runtimeData, textsFor } from './config.js';
+import { activeProviders, categoriesOf, policyOf, runtimeData, textsFor } from './config.js';
 import type { Texts } from './i18n.js';
 import { css } from './styles.js';
 import type { Category, Duration, KeksiConfig, Locale, NecessaryCookie } from './types.js';
@@ -19,7 +19,7 @@ export function renderKeksi(config: KeksiConfig, { lang = 'fi', nonce }: RenderO
   if (!cats.length) return '';
   const t = textsFor(config, lang);
   const active = activeProviders(config);
-  const policy = typeof config.policyUrl === 'string' ? config.policyUrl : config.policyUrl?.[lang];
+  const policy = policyOf(config, lang);
   const n = nonce ? ` nonce="${e(nonce)}"` : '';
   const btn = (action: string, label: string, type = 'button') =>
     `<button type="${type}" class="keksi-btn" data-keksi="${action}">${e(label)}</button>`;

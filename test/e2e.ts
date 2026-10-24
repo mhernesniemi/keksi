@@ -92,13 +92,15 @@ export function consentSuite(config: KeksiConfig): void {
     await watchTracking(page, config, { allow: ['session'] }).check();
   });
 
-  test('YouTube shows a placeholder until clicked', async ({ page }) => {
+  test('YouTube shows a placeholder until clicked and remembers the click', async ({ page }) => {
     await page.goto('/');
     const video = page.locator('keksi-youtube');
     await expect(video.locator('iframe')).toHaveCount(0);
-    await video.getByRole('button', { name: 'Näytä video: Big Buck Bunny' }).click();
+    await video.getByRole('button', { name: 'Toista video: Big Buck Bunny' }).click();
     await expect(video.locator('iframe')).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ?autoplay=1');
     await expect(page.getByRole('region', { name: 'Evästeet' })).toBeVisible();
+    await page.reload();
+    await expect(video.locator('iframe')).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ');
   });
 
   test('the policy page lists every cookie', async ({ page }) => {

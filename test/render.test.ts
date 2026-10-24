@@ -77,6 +77,12 @@ describe('render', () => {
     expect(us).toContain('<p>Data is transferred to the United States.</p>');
   });
 
+  it('keeps the banner hidden by itself with YouTube only', () => {
+    const data = (html: string) => JSON.parse(html.match(/id="keksi-data">(.*?)<\/script>/)![1]!);
+    expect(data(renderKeksi({ youtube: true })).banner).toBe(false);
+    expect(data(renderKeksi({ youtube: true, ga: 'G-1' })).banner).toBe(true);
+  });
+
   it('changes the version only when providers change', () => {
     expect(version({ ga: 'G-1' })).toBe(version({ ga: ['G-2', 'G-3'] }));
     expect(version({ ga: 'G-1' })).not.toBe(version({ ga: 'G-1', meta: '1' }));
