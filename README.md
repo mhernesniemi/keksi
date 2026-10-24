@@ -53,8 +53,6 @@ import config from '../keksi.config';
 export const handle = keksiHandle(config);
 ```
 
-The language is Astro's current locale, or `<html lang>` in SvelteKit, and Finnish otherwise. Pass `lang` to set it.
-
 Any element with `data-keksi-open` reopens the settings. Put one in the footer:
 
 ```html
@@ -118,6 +116,7 @@ await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 
 - **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
   `--keksi-radius`, `--keksi-focus`.
+- **Language:** follows the page's language, otherwise Finnish. Pass `lang` to set it.
 - **Texts:** `texts: { fi: { intro: '…' } }`.
 - **CSP:** pass `nonce`.
 - **Other frameworks:** `renderKeksi(config, { lang })` returns the HTML to put after `<body>`.
