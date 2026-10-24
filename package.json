@@ -1,7 +1,7 @@
 {
   "name": "keksi",
   "version": "0.1.6",
-  "description": "Cookie consent for Astro and SvelteKit. Loads trackers only after the visitor says yes.",
+  "description": "Superlight cookie consent for modern web frameworks",
   "keywords": ["cookie consent", "cookie banner", "gdpr", "astro", "sveltekit", "google analytics", "meta pixel", "posthog", "youtube"],
   "license": "MIT",
   "type": "module",
