@@ -61,10 +61,11 @@ export function consentSuite(config: KeksiConfig): void {
     const tracking = watchTracking(page, config);
     await page.goto('/');
     await page.getByRole('button', { name: 'Asetukset', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'Evästeasetukset' });
-    await dialog.getByRole('switch', { name: 'Analytiikka' }).check();
-    await dialog.getByRole('button', { name: 'Tallenna valinnat' }).click();
-    await expect(dialog).toBeHidden();
+    const settings = page.getByRole('form', { name: 'Evästeasetukset' });
+    await settings.getByRole('switch', { name: 'Analytiikka' }).check();
+    await settings.getByRole('button', { name: 'Tallenna valinnat' }).click();
+    await expect(settings).toBeHidden();
+    await expect(page.getByRole('region', { name: 'Evästeet' })).toBeHidden();
     await expect.poll(() => tracking.requests).toEqual([
       'https://www.googletagmanager.com/gtag/js?id=G-TEST123',
       'https://eu-assets.i.posthog.com/static/array.js',
@@ -83,7 +84,7 @@ export function consentSuite(config: KeksiConfig): void {
     });
     await page.getByRole('button', { name: 'Evästeasetukset' }).click();
     const reload = page.waitForEvent('load');
-    await page.getByRole('dialog').getByRole('button', { name: 'Hylkää kaikki' }).click();
+    await page.getByRole('form', { name: 'Evästeasetukset' }).getByRole('button', { name: 'Hylkää kaikki' }).click();
     await reload;
     const names = (await context.cookies()).map((c) => c.name).sort();
     expect(names).toEqual(['keksi', 'session']);
@@ -107,11 +108,11 @@ export function consentSuite(config: KeksiConfig): void {
     }
   });
 
-  test('Escape closes the settings without deciding', async ({ page }) => {
+  test('Escape returns from the settings to the banner without deciding', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Asetukset', exact: true }).click();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog')).toBeHidden();
+    await expect(page.getByRole('form', { name: 'Evästeasetukset' })).toBeHidden();
     await expect(page.getByRole('region', { name: 'Evästeet' })).toBeVisible();
     expect(await page.evaluate(() => window.keksi!.consent)).toBeNull();
   });

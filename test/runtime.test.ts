@@ -109,13 +109,16 @@ describe('runtime', () => {
     expect(w0.api.consent).toEqual({ analytics: false, marketing: false });
   });
 
-  it('opens the dialog with the current choices', () => {
+  it('opens the settings in the banner with the current choices', () => {
     const { w, click } = setup(`keksi=${data.v}.x.abc.m`, '<a href="#" data-keksi-open>Evästeasetukset</a>');
     click('a[data-keksi-open]');
-    const dialog = w.document.getElementById('keksi-dialog') as HTMLDialogElement;
-    expect(dialog.open).toBe(true);
-    expect((dialog.querySelector('[name=analytics]') as HTMLInputElement).checked).toBe(false);
-    expect((dialog.querySelector('[name=marketing]') as HTMLInputElement).checked).toBe(true);
+    const form = w.document.getElementById('keksi-settings') as HTMLFormElement;
+    expect(w.document.getElementById('keksi-banner')!.hidden).toBe(false);
+    expect(form.hidden).toBe(false);
+    expect((form.querySelector('[name=analytics]') as HTMLInputElement).checked).toBe(false);
+    expect((form.querySelector('[name=marketing]') as HTMLInputElement).checked).toBe(true);
+    click('[data-keksi=close]');
+    expect(w.document.getElementById('keksi-banner')!.hidden).toBe(true);
   });
 
   it('shows a placeholder for YouTube and loads the video on click', () => {

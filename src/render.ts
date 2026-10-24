@@ -13,7 +13,7 @@ export interface RenderOptions {
 
 const e = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** Banner, settings dialog and runtime. Place it right after `<body>`. Empty when no provider needs consent. */
+/** Banner with its settings view, and the runtime. Place it right after `<body>`. Empty when no provider needs consent. */
 export function renderKeksi(config: KeksiConfig, { lang = 'fi', nonce }: RenderOptions = {}): string {
   const cats = categoriesOf(config);
   if (!cats.length) return '';
@@ -31,16 +31,17 @@ export function renderKeksi(config: KeksiConfig, { lang = 'fi', nonce }: RenderO
   return (
     `<style${n}>${css}</style>` +
     `<section id="keksi-banner" class="keksi" aria-labelledby="keksi-title" hidden>` +
-    `<h2 id="keksi-title">${e(t.title)}</h2><p>${e(t.intro)}</p><ul>${uses}</ul>` +
-    `<p>${e(t.change)}${policy ? ` <a href="${e(policy)}">${e(t.more)}</a>` : ''}</p>` +
-    `<div class="keksi-actions">${btn('accept', t.accept)}${btn('reject', t.reject)}` +
-    `<button type="button" class="keksi-btn" data-keksi-open>${e(t.settings)}</button></div></section>` +
-    `<dialog id="keksi-dialog" class="keksi-dialog" aria-labelledby="keksi-dialog-title"><form method="dialog">` +
-    `<div class="keksi-head"><h2 id="keksi-dialog-title">${e(t.settingsTitle)}</h2>` +
-    `<button class="keksi-close" aria-label="${e(t.close)}">×</button></div>` +
-    sections(config, lang, 3, true) +
-    `<div class="keksi-actions">${btn('save', t.save, 'submit')}${btn('accept', t.accept, 'submit')}${btn('reject', t.reject, 'submit')}</div>` +
-    `</form></dialog>` +
+    `<div class="keksi-main"><div class="keksi-head"><h2 id="keksi-title">${e(t.title)}</h2></div>` +
+    `<div class="keksi-body"><p>${e(t.intro)}</p><ul>${uses}</ul>` +
+    `<p>${e(t.change)}${policy ? ` <a href="${e(policy)}">${e(t.more)}</a>` : ''}</p></div>` +
+    `<div class="keksi-actions"><button type="button" class="keksi-text" data-keksi-open>${e(t.settings)}</button>` +
+    `${btn('reject', t.reject)}${btn('accept', t.accept)}</div></div>` +
+    `<form id="keksi-settings" class="keksi-settings" aria-labelledby="keksi-settings-title" hidden>` +
+    `<div class="keksi-head"><h2 id="keksi-settings-title">${e(t.settingsTitle)}</h2>` +
+    `<button type="button" class="keksi-close" data-keksi="close" aria-label="${e(t.close)}">×</button></div>` +
+    `<div class="keksi-body">${sections(config, lang, 3, true)}</div>` +
+    `<div class="keksi-actions">${btn('save', t.save)}${btn('reject', t.reject)}${btn('accept', t.accept)}</div>` +
+    `</form></section>` +
     `<script type="application/json" id="keksi-data">${json}</script><script${n}>${__RUNTIME__}</script>`
   );
 }

@@ -167,19 +167,28 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     else load(c);
   }
 
-  function sync(): void {
+  /** Shows the banner, the settings view in it, or neither. */
+  function view(settings = false, show = !state || settings): void {
     const banner = $('keksi-banner');
-    if (banner) banner.hidden = !!state;
+    const form = $<HTMLFormElement>('keksi-settings');
+    if (!banner || !form) return;
+    banner.hidden = !show;
+    form.hidden = !settings;
+    (banner.firstElementChild as HTMLElement).hidden = settings;
+  }
+
+  function sync(): void {
+    view();
   }
 
   function open(): void {
-    const dialog = $<HTMLDialogElement>('keksi-dialog');
-    if (!dialog) return;
+    const form = $<HTMLFormElement>('keksi-settings');
     for (const k of CATS) {
-      const input = dialog.querySelector<HTMLInputElement>(`[name=${k}]`);
+      const input = form?.querySelector<HTMLInputElement>(`[name=${k}]`);
       if (input) input.checked = !!state?.c[k];
     }
-    dialog.showModal();
+    view(true);
+    form?.querySelector<HTMLElement>('.keksi-close')?.focus();
   }
 
   doc.addEventListener('click', (e) => {
@@ -190,12 +199,16 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       return open();
     }
     const action = el.getAttribute('data-keksi');
-    if (action === 'accept') save({ analytics: true, marketing: true });
+    if (action === 'close') view();
+    else if (action === 'accept') save({ analytics: true, marketing: true });
     else if (action === 'reject') save(NONE);
     else if (action === 'save') {
-      const checked = (k: Category) => !!$('keksi-dialog')?.querySelector<HTMLInputElement>(`[name=${k}]`)?.checked;
+      const checked = (k: Category) => !!$('keksi-settings')?.querySelector<HTMLInputElement>(`[name=${k}]`)?.checked;
       save({ analytics: checked('analytics'), marketing: checked('marketing') });
     }
+  });
+  doc.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('keksi-settings')?.hidden === false) view();
   });
   doc.addEventListener('astro:after-swap', sync);
 
