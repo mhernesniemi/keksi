@@ -188,6 +188,8 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     const form = $<HTMLFormElement>('keksi-settings');
     if (!banner || !form) return;
     banner.hidden = !show;
+    // Keeps the closing banner's content, so it doesn't resize while animating out.
+    if (!show) return;
     form.hidden = !settings;
     (banner.firstElementChild as HTMLElement).hidden = settings;
   }

@@ -4,6 +4,7 @@ export const css = [
   ':where(.keksi){box-sizing:border-box;background:var(--_bg);color:var(--_fg);font:inherit;font-size:14px;line-height:1.5;border:1px solid var(--_line);--_line:var(--keksi-line,#d4d4d8);border-radius:var(--_r);box-shadow:0 0 0 1px #0000000d,0 4px 12px #00000014,0 20px 56px #0000003d}',
   ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem;display:flex;flex-direction:column;max-width:34rem;max-height:calc(100vh - 2rem);margin-inline:auto;overflow:hidden}',
   ':where(.keksi,.keksi-main,.keksi-settings)[hidden]{display:none}',
+  '@media (prefers-reduced-motion:no-preference){:where(.keksi){transition:opacity .2s ease,translate .2s ease,scale .2s ease,display .2s allow-discrete}:where(.keksi[hidden]){opacity:0;translate:0 8px;scale:.98}@starting-style{:where(.keksi){translate:0 8px}}}',
   ':where(.keksi-main,.keksi-settings){display:flex;flex-direction:column;min-height:0;margin:0}',
   ':where(.keksi:has(.keksi-settings:not([hidden]))){max-width:40rem}',
   ':where(.keksi-settings .keksi-body){padding-block:0}',
