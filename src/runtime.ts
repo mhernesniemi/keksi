@@ -290,7 +290,9 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
     sync,
   };
   w.keksi = api;
-  sync();
+  // A prerendered page would play the entry animation before anyone sees it.
+  if ((doc as Document & { prerendering?: boolean }).prerendering) doc.addEventListener('prerenderingchange', sync, { once: true });
+  else sync();
   if (state) load(state.c);
   return api;
 }
