@@ -11,7 +11,7 @@ config, so there's nothing to block.
 - Rendered on the server. Works on static pages, with no layout shift.
 - The cookie policy table is generated from the same data.
 
-**Demo:** [keksi-demo.mattih.workers.dev](https://keksi-demo.mattih.workers.dev/)
+[See demo](https://keksi-demo.mattih.workers.dev/)
 
 ## Setup
 
