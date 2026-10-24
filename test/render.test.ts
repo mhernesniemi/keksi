@@ -83,6 +83,26 @@ describe('render', () => {
     expect(data(renderKeksi({ youtube: true, ga: 'G-1' })).banner).toBe(true);
   });
 
+  it('discloses custom providers like built-in ones', () => {
+    const config = {
+      providers: [
+        {
+          name: 'Leadfeeder',
+          company: 'Dealfront GmbH',
+          privacyPolicy: 'https://example.com/privacy',
+          category: 'marketing' as const,
+          purpose: { fi: 'Yritysten tunnistus', en: 'Company identification' },
+          cookies: [{ name: '_lfa', duration: '2y' as const }],
+        },
+      ],
+    };
+    const html = renderKeksi(config, { lang: 'sv' });
+    expect(html).toContain('<li><strong>Marknadsföring:</strong> Leadfeeder</li>');
+    expect(html).toContain('<p>Yritysten tunnistus</p>');
+    expect(cookieTable(config)).toContain('<code>_lfa</code></td><td>2 vuotta</td>');
+    expect(version(config)).not.toBe(version({}));
+  });
+
   it('changes the version only when providers change', () => {
     expect(version({ ga: 'G-1' })).toBe(version({ ga: ['G-2', 'G-3'] }));
     expect(version({ ga: 'G-1' })).not.toBe(version({ ga: 'G-1', meta: '1' }));

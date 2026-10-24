@@ -184,6 +184,37 @@ describe('runtime', () => {
   });
 });
 
+describe('custom providers', () => {
+  const custom: KeksiConfig = {
+    providers: [
+      {
+        name: 'Chat',
+        company: 'Chat Oy',
+        privacyPolicy: 'https://chat.example/privacy',
+        category: 'analytics',
+        purpose: 'Chat',
+        cookies: [{ name: 'chat_*', duration: '1y' }],
+        script: 'https://chat.example/widget.js',
+      },
+    ],
+  };
+
+  it('loads the script after consent and deletes its cookies on withdrawal', () => {
+    const w = new HappyWindow({ url: 'https://www.example.fi/' }) as unknown as Window & typeof globalThis;
+    w.document.body.innerHTML = renderKeksi(custom).replace(/<script[\s\S]*<\/script>/, '');
+    Object.defineProperty(w.location, 'reload', { value: vi.fn() });
+    const api = boot(runtimeData(custom, 'fi'), w);
+    const scripts = () => [...w.document.head.querySelectorAll('script')].map((s) => s.src);
+    expect(scripts()).toEqual([]);
+    api.save({ analytics: true });
+    api.save({ analytics: true, marketing: true });
+    expect(scripts()).toEqual(['https://chat.example/widget.js']);
+    w.document.cookie = 'chat_id=1; Path=/';
+    api.rejectAll();
+    expect(w.document.cookie).not.toContain('chat_id=1');
+  });
+});
+
 describe('posthog', () => {
   const ph: KeksiConfig = { posthog: { key: 'phc_test' } };
   const phData = runtimeData(ph, 'en');

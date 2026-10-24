@@ -1,6 +1,6 @@
 import { type Texts, texts } from './i18n.js';
 import { providers } from './providers.js';
-import type { Category, KeksiConfig, Locale, Provider, RuntimeData } from './types.js';
+import type { Category, CustomProvider, KeksiConfig, Locale, Provider, RuntimeData } from './types.js';
 
 export function defineConfig(config: KeksiConfig): KeksiConfig {
   return config;
@@ -15,7 +15,13 @@ export function activeProviders(config: KeksiConfig): Provider[] {
     .filter((p) =>
       p.id === 'youtube' ? config.youtube : p.id === 'posthog' ? config.posthog?.key : list(config[p.id]).length,
     )
-    .map((p) => (p.id === 'posthog' && /\/\/us\./.test(posthogHost(config)) ? { ...p, transfer: 'us' } : p));
+    .map((p): Provider => (p.id === 'posthog' && /\/\/us\./.test(posthogHost(config)) ? { ...p, transfer: 'us' } : p))
+    .concat((config.providers ?? []).map(custom));
+}
+
+function custom({ purpose, hosts = [], script: _, ...p }: CustomProvider): Provider {
+  const text = (l: Locale) => (typeof purpose === 'string' ? purpose : (purpose[l] ?? Object.values(purpose).find(Boolean) ?? ''));
+  return { ...p, id: `custom:${p.name}`, purpose: { fi: text('fi'), sv: text('sv'), en: text('en') }, hosts };
 }
 
 export function categoriesOf(config: KeksiConfig): Category[] {
@@ -56,6 +62,10 @@ export function runtimeData(config: KeksiConfig, locale: Locale): RuntimeData {
     ads: list(config.googleAds),
     meta: list(config.meta),
     ph: config.posthog?.key ? { key: config.posthog.key, host: posthogHost(config) } : undefined,
+    scripts: {
+      analytics: (config.providers ?? []).filter((p) => p.script && p.category === 'analytics').map((p) => p.script!),
+      marketing: (config.providers ?? []).filter((p) => p.script && p.category === 'marketing').map((p) => p.script!),
+    },
     yt: !!config.youtube,
     banner: needsBanner(config),
     policy: policyOf(config, locale),

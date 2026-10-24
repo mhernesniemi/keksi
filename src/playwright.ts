@@ -3,18 +3,17 @@ import { runtimeData } from './config.js';
 import { providers } from './providers.js';
 import type { Consent, KeksiConfig } from './types.js';
 
-const trackerHosts = [...new Set(providers.flatMap((p) => p.hosts))];
-
 export interface TrackingOptions {
   /** Cookies and localStorage keys your site sets without consent, e.g. a session cookie. */
   allow?: string[];
 }
 
 /**
- * Records requests to Google, Meta and YouTube from now on. `check()` throws when any were made or when the page
+ * Records requests to the built-in and configured providers from now on. `check()` throws when any were made or when the page
  * stored anything besides the consent cookie and `allow`.
  */
 export function watchTracking(page: Page, config: KeksiConfig, { allow = [] }: TrackingOptions = {}) {
+  const trackerHosts = [...providers, ...(config.providers ?? [])].flatMap((p) => p.hosts ?? []);
   const requests: string[] = [];
   page.on('request', (r) => {
     const host = new URL(r.url()).hostname;

@@ -24,6 +24,8 @@ export interface KeksiConfig {
     domain?: string;
     days?: number;
   };
+  /** Providers keksi doesn't have built in, e.g. one client's chat widget. */
+  providers?: CustomProvider[];
   /** Cookies your site or framework sets without consent, usually from `keksi scan`. Listed under "Necessary". */
   necessary?: NecessaryCookie[];
   texts?: Partial<Record<Locale, Partial<Texts>>>;
@@ -39,6 +41,21 @@ export interface NecessaryCookie {
   storage?: string;
 }
 
+export interface CustomProvider {
+  name: string;
+  company: string;
+  privacyPolicy: string;
+  category: Category;
+  /** One text for all languages, or per language. */
+  purpose: string | Partial<Record<Locale, string>>;
+  cookies: CookieInfo[];
+  /** Hosts it contacts, for the Playwright check. */
+  hosts?: string[];
+  transfer?: 'dpf' | 'us';
+  /** Loaded after consent in `category`. Leave out to load it yourself on `keksi:change`. */
+  script?: string;
+}
+
 /** `session`, `persistent`, or a number with unit: `2y`, `13mo`, `90d`, `15min`. */
 export type Duration = 'session' | 'persistent' | `${number}${'y' | 'mo' | 'd' | 'min'}`;
 
@@ -51,7 +68,8 @@ export interface CookieInfo {
 }
 
 export interface Provider {
-  id: ProviderId;
+  /** Custom providers get `custom:` and their name. */
+  id: ProviderId | `custom:${string}`;
   name: string;
   category: Category;
   company: string;
@@ -74,6 +92,8 @@ export interface RuntimeData {
   ads: string[];
   meta: string[];
   ph?: { key: string; host: string };
+  /** Custom provider scripts per category. */
+  scripts: Record<Category, string[]>;
   yt: boolean;
   /** False with YouTube only: the settings exist but the banner doesn't show by itself. */
   banner: boolean;

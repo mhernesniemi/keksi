@@ -1,9 +1,9 @@
-import type { Provider } from './types.js';
+import type { Provider, ProviderId } from './types.js';
 
 const GOOGLE = { company: 'Google Ireland Limited', privacyPolicy: 'https://policies.google.com/privacy', transfer: 'dpf' as const };
 const META = { company: 'Meta Platforms Ireland Limited', privacyPolicy: 'https://www.facebook.com/privacy/policy/', transfer: 'dpf' as const };
 
-export const providers: Provider[] = [
+export const providers: (Provider & { id: ProviderId })[] = [
   {
     id: 'ga',
     name: 'Google Analytics',

@@ -46,6 +46,7 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
   let metaLoaded = false;
   let posthogLoaded = false;
   const configured = new Set<string>();
+  const loaded = new Set<string>();
 
   const consentDefault = args('consent', 'default', {
     ad_storage: 'denied',
@@ -142,6 +143,11 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
       w.posthog!._i.push([d.ph.key, { api_host: d.ph.host, defaults: '2026-08-30' }, 'posthog']);
       script(`${d.ph.host.replace('.i.posthog.com', '-assets.i.posthog.com')}/static/array.js`).crossOrigin = 'anonymous';
     }
+    for (const src of CATS.flatMap((k) => (c[k] ? d.scripts[k] : [])))
+      if (!loaded.has(src)) {
+        loaded.add(src);
+        script(src);
+      }
     if (state?.yt) for (const el of doc.querySelectorAll<YouTube>('keksi-youtube')) el.show(true);
   }
 

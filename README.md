@@ -110,6 +110,47 @@ posthog.capture('signup');
 - `poster` is optional and should be self-hosted. YouTube's thumbnails come from `i.ytimg.com`, which would contact
   Google before consent.
 
+## Other providers
+
+For a provider keksi doesn't have, describe it in `providers`. It's listed in the banner, the settings and the
+policy page, and handled like the built-in ones.
+
+```ts
+export default defineConfig({
+  ga: 'G-XXXXXXX',
+  providers: [
+    {
+      name: 'Leadfeeder',
+      company: 'Dealfront GmbH',
+      privacyPolicy: 'https://www.dealfront.com/privacy-policy/',
+      category: 'marketing',
+      purpose: { fi: 'Vierailevien yritysten tunnistus.', en: 'Identifying visiting companies.' },
+      cookies: [{ name: '_lfa', duration: '2y' }],
+      hosts: ['lfeeder.com'],
+      script: 'https://sc.lfeeder.com/lftracker_v1_XXXX.js',
+    },
+  ],
+});
+```
+
+- `script` is loaded after consent in its category.
+- First-party `cookies` are deleted on withdrawal; `*` works as a wildcard. Add `host` to ones set on the provider's
+  domain.
+- `hosts` are what `watchTracking` checks for.
+- Adding a provider asks returning visitors again.
+
+If the provider needs setup code, leave out `script` and load it yourself:
+
+```ts
+const load = () => {
+  if (window.keksi?.consent?.marketing) {
+    // inject the script and run its setup
+  }
+};
+load();
+document.addEventListener('keksi:change', load);
+```
+
 ## API
 
 ```ts
@@ -170,5 +211,5 @@ pnpm test
 pnpm test:e2e   # Astro and SvelteKit examples
 ```
 
-To add a provider: add its data to `src/providers.ts`, a config key with the same id to `KeksiConfig`, and its
+To build in a provider that's used across projects: add its data to `src/providers.ts`, a config key with the same id to `KeksiConfig`, and its
 loading to `load()` in `src/runtime.ts`.
