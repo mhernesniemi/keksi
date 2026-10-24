@@ -1,19 +1,21 @@
 # keksi
 
-Lean cookie consent for Astro, SvelteKit and other server-rendered sites, covering Google Analytics 4, Google Ads,
-Meta Pixel and YouTube embeds. Texts in Finnish, Swedish and English, built around Finnish and EU law.
+Lean cookie consent for Astro, SvelteKit and other server-rendered sites. Built around Finnish and EU law, with
+texts in Finnish, Swedish and English.
 
-The provider list is deliberately short. keksi supports a few common trackers well rather than every tracker
-loosely, and new providers are added when they're needed.
+keksi loads the trackers itself, and only after consent. You don't add their script tags: you put their ids in the
+config, so there's nothing to block.
 
-keksi loads the trackers itself, and only after consent. You don't add their script tags; you write their ids into
-the config. Nothing has to be blocked or intercepted, because nothing is on the page until keksi adds it.
-
-- About 5 KB gzipped per page, inline: banner, settings, styles and a 2.4 KB runtime. No requests, no dependencies.
-- Rendered on the server, works with static pages, no layout shift. With no providers configured it renders nothing.
-- The cookie policy table comes from the same data, so it can't drift from what the site loads.
+- Google Analytics 4, Google Ads, Meta Pixel and YouTube. The short list is deliberate.
+- About 5 KB gzipped, inline. No extra requests, no dependencies.
+- Rendered on the server. Works on static pages, with no layout shift.
+- The cookie policy table is generated from the same data.
 
 ## Setup
+
+```sh
+pnpm add keksi
+```
 
 ```ts
 // keksi.config.ts
@@ -28,7 +30,7 @@ export default defineConfig({
 });
 ```
 
-Render it right after `<body>`, and give the footer a way to reopen the settings:
+Render it right after `<body>`:
 
 ```astro
 ---
@@ -44,7 +46,7 @@ import config from '../../keksi.config';
 ```
 
 ```ts
-// SvelteKit: src/hooks.server.ts. Keeps keksi out of the client bundle and outside the Svelte root.
+// SvelteKit: src/hooks.server.ts
 import type { Handle } from '@sveltejs/kit/hooks';
 import { renderKeksi } from 'keksi';
 import config from '../keksi.config';
@@ -55,39 +57,36 @@ export const handle: Handle = ({ event, resolve }) =>
   resolve(event, { transformPageChunk: ({ html }) => html.replace(/<body([^>]*)>/, `<body$1>${keksi}`) });
 ```
 
-Policy page:
+Any element with `data-keksi-open` reopens the settings. Put one in the footer.
+
+Cookie policy page:
 
 ```astro
 <Fragment set:html={cookieTable(config, { lang: 'fi' })} />
 ```
 
-In SvelteKit, return `cookieTable(...)` from a prerendered `+page.server.ts` and render it with `{@html}`.
+## Tracking events
 
-## Using the trackers
-
-`gtag()` and `fbq()` exist from the start, so page code can call them at any time:
+`gtag()` and `fbq()` are always defined, so you can call them anytime:
 
 ```ts
 gtag('event', 'generate_lead');
 fbq('track', 'Lead');
 ```
 
-Calls made before consent wait in the queue. If the visitor consents on that page, they're sent after the tags are
-configured. Otherwise they're never sent. Single-page navigation is tracked by GA4 and Meta Pixel themselves.
-
-Google gets Consent Mode v2 signals: everything `denied` by default, updated to match the choice. Only basic mode,
-because gtag.js isn't loaded at all before consent.
+- Calls made before consent are queued. They're sent only if the visitor consents on that page.
+- Google gets Consent Mode v2 signals (basic mode).
+- GA4 and Meta Pixel track single-page navigation themselves.
 
 ## YouTube
 
 ```html
-<keksi-youtube video="aqz-KE-bpKQ" label="Esittelyvideo"></keksi-youtube>
+<keksi-youtube video="aqz-KE-bpKQ" label="Esittelyvideo" poster="/img/poster.jpg"></keksi-youtube>
 ```
 
-The element shows a placeholder with a "Show video" button, plus an "Open on YouTube" link. The click loads that
-one video from `youtube-nocookie.com`. With marketing consent, videos load directly. Add `poster="/img/poster.jpg"`
-for a self-hosted thumbnail. Thumbnails from YouTube are not used, since those requests would go to Google before
-consent.
+- Shows a placeholder until the visitor clicks it, then loads that one video from `youtube-nocookie.com`.
+- With marketing consent, videos load directly.
+- `poster` is optional and should be self-hosted. Thumbnails from YouTube would contact Google before consent.
 
 ## API
 
@@ -100,16 +99,7 @@ window.keksi.rejectAll();
 document.addEventListener('keksi:change', (e) => e.detail);
 ```
 
-## Withdrawal
-
-When a category is withdrawn, keksi deletes that category's cookies and localStorage keys on this site, on every
-parent domain, and then reloads, because tags that are already running can't be unloaded. Cookies set by Google or
-Meta on their own domains (`IDE`, `fr`, YouTube's) can't be deleted from your site. They are listed on the policy page
-as third-party cookies.
-
 ## Testing
-
-Use these in your own Playwright tests. The examples use them too:
 
 ```ts
 import { consentCookie, watchTracking } from 'keksi/playwright';
@@ -118,46 +108,43 @@ test('nothing tracks before consent', async ({ page }) => {
   const tracking = watchTracking(page, config, { allow: ['session'] });
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await tracking.check(); // throws on requests to Google, Meta or YouTube, or on stored data
+  await tracking.check(); // throws on tracker requests or stored data
 });
 
 // Skip the banner in other tests
 await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 ```
 
-## Theming and texts
+## Customizing
 
-The styles have zero specificity, so any site rule wins. Set `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
-`--keksi-radius` and `--keksi-focus`, or style `.keksi`, `.keksi-dialog` and `.keksi-btn`. Override texts per
-language with `texts: { fi: { intro: '…' } }`. Pass `nonce` to `renderKeksi` for a CSP with nonces.
+- **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
+  `--keksi-radius`, `--keksi-focus`.
+- **Texts:** `texts: { fi: { intro: '…' } }`.
+- **CSP:** `renderKeksi(config, { nonce })`.
+- **Consent cookie:** `cookie: { name, domain, days }`. Kept for 365 days by default.
 
-## Consent record
-
-The `keksi` cookie holds the version, time, a random id and the choices, for 365 days (`cookie.days`). The version
-changes when a provider is added or removed, so everyone is asked again. Ids and texts can change under the same
-version.
-
-## What the law requires and how keksi meets it
+## Legal basis
 
 | Requirement | Basis | keksi |
 |---|---|---|
-| No non-essential storage or access before consent | Act 917/2014 §205 | Trackers aren't loaded until consent |
-| Purpose, duration and third parties disclosed | §205, CJEU *Planet49* | Providers on the first layer, cookies and durations in settings and on the policy page |
-| Separate choices per purpose, rejecting as easy as accepting | GDPR Art. 4(11), 7; Traficom 2024 decisions | One switch per category, "Reject all" on the first layer, same button style |
-| Withdrawal as easy as consent, with real effect | GDPR Art. 7(3) | `data-keksi-open` anywhere, deletes stored data |
-| Able to show consent was given | GDPR Art. 7(1) | Consent cookie with id, time and version |
+| No non-essential storage before consent | Act 917/2014 §205 | Trackers load only after consent |
+| Purpose, duration and third parties disclosed | §205, CJEU *Planet49* | Providers on the banner, cookies and durations in settings and on the policy page |
+| Separate choices, rejecting as easy as accepting | GDPR Art. 4(11), 7; Traficom 2024 | A switch per category, "Reject all" on the banner |
+| Withdrawal is easy and has real effect | GDPR Art. 7(3) | Deletes the category's cookies and localStorage on your domain, then reloads |
+| Consent can be demonstrated | GDPR Art. 7(1) | Consent cookie with id, time and version. Adding or removing a provider asks again |
 | Transfers outside the EU disclosed | GDPR Art. 13(1)(f) | DPF transfer stated per provider |
 
-## Adding a provider
-
-Add its disclosure and cookies to `src/providers.ts`, a config key with the same id to `KeksiConfig`, and its loading
-to `load()` in `src/runtime.ts`.
+Cookies that Google and Meta set on their own domains can't be deleted from your site. The policy page lists them as
+third-party cookies.
 
 ## Development
 
 ```sh
 pnpm install
-pnpm build       # dist/, prints the runtime size
-pnpm test        # unit tests
-pnpm test:e2e    # both examples in Chromium
+pnpm build      # prints the runtime size
+pnpm test
+pnpm test:e2e   # Astro and SvelteKit examples
 ```
+
+To add a provider: add its data to `src/providers.ts`, a config key with the same id to `KeksiConfig`, and its
+loading to `load()` in `src/runtime.ts`.
