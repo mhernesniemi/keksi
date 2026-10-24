@@ -1,7 +1,10 @@
 # keksi
 
-Lean cookie consent for our client sites: Google Analytics 4, Google Ads, Meta Pixel and YouTube embeds, in Finnish,
-Swedish and English.
+Lean cookie consent for Astro, SvelteKit and other server-rendered sites, covering Google Analytics 4, Google Ads,
+Meta Pixel and YouTube embeds. Texts in Finnish, Swedish and English, built around Finnish and EU law.
+
+The provider list is deliberately short. keksi supports a few common trackers well rather than every tracker
+loosely, and new providers are added when they're needed.
 
 keksi loads the trackers itself, and only after consent. You don't add their script tags; you write their ids into
 the config. Nothing has to be blocked or intercepted, because nothing is on the page until keksi adds it.
@@ -101,12 +104,12 @@ document.addEventListener('keksi:change', (e) => e.detail);
 
 When a category is withdrawn, keksi deletes that category's cookies and localStorage keys on this site, on every
 parent domain, and then reloads, because tags that are already running can't be unloaded. Cookies set by Google or
-Meta on their own domains (`IDE`, `fr`, YouTube's) can't be deleted from our site. They are listed on the policy page
+Meta on their own domains (`IDE`, `fr`, YouTube's) can't be deleted from your site. They are listed on the policy page
 as third-party cookies.
 
 ## Testing
 
-The examples use the same helpers you'd use in a client project's Playwright tests:
+Use these in your own Playwright tests. The examples use them too:
 
 ```ts
 import { consentCookie, watchTracking } from 'keksi/playwright';
