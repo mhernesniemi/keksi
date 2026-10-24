@@ -1,7 +1,7 @@
 # keksi
 
 Lean cookie consent for Astro, SvelteKit and other server-rendered sites. Built around Finnish and EU law, with
-texts in Finnish, Swedish and English.
+texts in English, Finnish and Swedish.
 
 keksi loads the trackers itself, and only after consent. You don't add their script tags: you put their ids in the
 config, so there's nothing to block.
