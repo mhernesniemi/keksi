@@ -30,40 +30,39 @@ export default defineConfig({
 });
 ```
 
-Render it right after `<body>`:
+**Astro:** add the component right after `<body>` in your layout.
 
 ```astro
 ---
-// Astro layout
-import { renderKeksi } from 'keksi';
+import { Keksi } from 'keksi/astro';
 import config from '../../keksi.config';
 ---
 <body>
-  <Fragment set:html={renderKeksi(config, { lang: 'fi' })} />
+  <Keksi config={config} />
   ...
-  <button type="button" data-keksi-open>Evästeasetukset</button>
 </body>
 ```
 
+**SvelteKit:** add the hook. It renders keksi outside the Svelte root and keeps it out of the client bundle.
+
 ```ts
-// SvelteKit: src/hooks.server.ts
-import type { Handle } from '@sveltejs/kit/hooks';
-import { renderKeksi } from 'keksi';
+// src/hooks.server.ts
+import { keksiHandle } from 'keksi/sveltekit';
 import config from '../keksi.config';
 
-const keksi = renderKeksi(config, { lang: 'fi' });
-
-export const handle: Handle = ({ event, resolve }) =>
-  resolve(event, { transformPageChunk: ({ html }) => html.replace(/<body([^>]*)>/, `<body$1>${keksi}`) });
+export const handle = keksiHandle(config);
 ```
 
-Any element with `data-keksi-open` reopens the settings. Put one in the footer.
+The language is Astro's current locale, or `<html lang>` in SvelteKit, and Finnish otherwise. Pass `lang` to set it.
 
-Cookie policy page:
+Any element with `data-keksi-open` reopens the settings. Put one in the footer:
 
-```astro
-<Fragment set:html={cookieTable(config, { lang: 'fi' })} />
+```html
+<button type="button" data-keksi-open>Evästeasetukset</button>
 ```
+
+**Cookie policy page:** `<CookieTable config={config} />` from `keksi/astro`, or `cookieTable(config)` for an HTML
+string.
 
 ## Tracking events
 
@@ -120,7 +119,8 @@ await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 - **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
   `--keksi-radius`, `--keksi-focus`.
 - **Texts:** `texts: { fi: { intro: '…' } }`.
-- **CSP:** `renderKeksi(config, { nonce })`.
+- **CSP:** pass `nonce`.
+- **Other frameworks:** `renderKeksi(config, { lang })` returns the HTML to put after `<body>`.
 - **Consent cookie:** `cookie: { name, domain, days }`. Kept for 365 days by default.
 
 ## Legal basis

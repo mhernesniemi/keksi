@@ -1,0 +1,15 @@
+---
+import { cookieTable, type KeksiConfig, type Locale } from 'keksi';
+
+interface Props {
+  config: KeksiConfig;
+  lang?: Locale;
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { config, headingLevel } = Astro.props;
+const locale = Astro.currentLocale?.slice(0, 2);
+const lang = Astro.props.lang ?? (['fi', 'sv', 'en'].includes(locale!) ? (locale as Locale) : 'fi');
+---
+
+<Fragment set:html={cookieTable(config, { lang, headingLevel })} />

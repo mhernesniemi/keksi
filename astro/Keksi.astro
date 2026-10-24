@@ -1,0 +1,16 @@
+---
+import { renderKeksi, type KeksiConfig, type Locale } from 'keksi';
+
+interface Props {
+  config: KeksiConfig;
+  /** Defaults to Astro's current locale, then `fi`. */
+  lang?: Locale;
+  nonce?: string;
+}
+
+const { config, nonce } = Astro.props;
+const locale = Astro.currentLocale?.slice(0, 2);
+const lang = Astro.props.lang ?? (['fi', 'sv', 'en'].includes(locale!) ? (locale as Locale) : 'fi');
+---
+
+<Fragment set:html={renderKeksi(config, { lang, nonce })} />

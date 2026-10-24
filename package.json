@@ -10,7 +10,8 @@
     "node": ">=22.12"
   },
   "files": [
-    "dist"
+    "dist",
+    "astro"
   ],
   "exports": {
     ".": {
@@ -20,6 +21,14 @@
     "./playwright": {
       "types": "./dist/playwright.d.ts",
       "default": "./dist/playwright.js"
+    },
+    "./astro": {
+      "types": "./astro/index.d.ts",
+      "default": "./astro/index.js"
+    },
+    "./sveltekit": {
+      "types": "./dist/sveltekit.d.ts",
+      "default": "./dist/sveltekit.js"
     }
   },
   "scripts": {

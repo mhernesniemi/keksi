@@ -21,7 +21,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const code = await runtime();
   rmSync(`${root}dist`, { recursive: true, force: true });
   await build({
-    entryPoints: [`${root}src/index.ts`, `${root}src/playwright.ts`],
+    entryPoints: [`${root}src/index.ts`, `${root}src/playwright.ts`, `${root}src/sveltekit.ts`],
     outdir: `${root}dist`,
     bundle: true,
     format: 'esm',
