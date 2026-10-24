@@ -22,7 +22,19 @@ export interface KeksiConfig {
     domain?: string;
     days?: number;
   };
+  /** Cookies your site or framework sets without consent, usually from `keksi scan`. Listed under "Necessary". */
+  necessary?: NecessaryCookie[];
   texts?: Partial<Record<Locale, Partial<Texts>>>;
+}
+
+export interface NecessaryCookie {
+  name: string;
+  /** A `Duration`; plain string so JSON imports type-check. */
+  duration: string;
+  purpose?: string | Partial<Record<Locale, string>>;
+  host?: string;
+  /** `localStorage` or `sessionStorage`; omitted for cookies. */
+  storage?: string;
 }
 
 /** `session`, `persistent`, or a number with unit: `2y`, `13mo`, `90d`, `15min`. */

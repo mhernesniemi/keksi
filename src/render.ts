@@ -1,7 +1,7 @@
 import { activeProviders, categoriesOf, runtimeData, textsFor } from './config.js';
 import type { Texts } from './i18n.js';
 import { css } from './styles.js';
-import type { Category, CookieInfo, Duration, KeksiConfig, Locale } from './types.js';
+import type { Category, Duration, KeksiConfig, Locale, NecessaryCookie } from './types.js';
 
 declare const __RUNTIME__: string;
 
@@ -55,10 +55,12 @@ export function cookieTable(config: KeksiConfig, { lang = 'fi', headingLevel = 2
   return `<div class="keksi-policy">${sections(config, lang, headingLevel, false)}</div>`;
 }
 
+type Row = Omit<NecessaryCookie, 'purpose'> & { purpose?: string };
+
 interface Item {
   name: string;
-  purpose: string;
-  cookies: CookieInfo[];
+  purpose?: string;
+  cookies: Row[];
   company?: string;
   privacyPolicy?: string;
   transfer?: 'dpf';
@@ -68,10 +70,13 @@ function sections(config: KeksiConfig, lang: Locale, h: number, dialog: boolean)
   const t = textsFor(config, lang);
   const active = activeProviders(config);
   const { name, days } = runtimeData(config, lang);
+  const local = (v?: NecessaryCookie['purpose']) => (typeof v === 'object' ? (v[lang] ?? Object.values(v).find(Boolean)) : v);
   const site: Item = {
     name: t.thisSite,
-    purpose: t.consentPurpose,
-    cookies: [{ name, duration: (days % 365 ? `${days}d` : `${days / 365}y`) as Duration }],
+    cookies: [
+      { name, duration: days % 365 ? `${days}d` : `${days / 365}y`, purpose: t.consentPurpose },
+      ...(config.necessary ?? []).map((c) => ({ ...c, purpose: local(c.purpose) })),
+    ],
   };
 
   return (['necessary', ...categoriesOf(config)] as const)
@@ -90,7 +95,7 @@ function sections(config: KeksiConfig, lang: Locale, h: number, dialog: boolean)
       const list = items
         .map(
           (p) =>
-            `<div class="keksi-provider"><h${h + 1}>${e(p.name)}</h${h + 1}><p>${e(p.purpose)}</p>` +
+            `<div class="keksi-provider"><h${h + 1}>${e(p.name)}</h${h + 1}>${p.purpose ? `<p>${e(p.purpose)}</p>` : ''}` +
             (p.company && p.privacyPolicy
               ? `<p>${e(p.company)} · <a href="${e(p.privacyPolicy)}" target="_blank" rel="noopener">${e(t.privacyPolicy)}</a></p>` +
                 (p.transfer ? `<p>${e(t.dpf)}</p>` : '')
@@ -108,23 +113,28 @@ function sections(config: KeksiConfig, lang: Locale, h: number, dialog: boolean)
     .join('');
 }
 
-function table(cookies: CookieInfo[], t: Texts): string {
+function table(cookies: Row[], t: Texts): string {
+  const purpose = cookies.some((c) => c.purpose);
   const rows = cookies
     .map(
       (c) =>
         `<tr><td><code>${e(c.name)}</code>${c.storage ? ` (${c.storage})` : ''}</td>` +
+        (purpose ? `<td>${e(c.purpose ?? '')}</td>` : '') +
         `<td>${e(duration(c.duration, t))}</td><td>${e(c.host ?? t.thisSite)}</td></tr>`,
     )
     .join('');
   return (
-    `<table><thead><tr><th scope="col">${e(t.name)}</th><th scope="col">${e(t.duration)}</th>` +
-    `<th scope="col">${e(t.setBy)}</th></tr></thead><tbody>${rows}</tbody></table>`
+    `<table><thead><tr><th scope="col">${e(t.name)}</th>` +
+    (purpose ? `<th scope="col">${e(t.purpose)}</th>` : '') +
+    `<th scope="col">${e(t.duration)}</th><th scope="col">${e(t.setBy)}</th></tr></thead><tbody>${rows}</tbody></table>`
   );
 }
 
-export function duration(d: Duration, t: Texts): string {
+export function duration(d: Duration | string, t: Texts): string {
   if (d === 'session' || d === 'persistent') return t[d];
-  const [, n, unit] = d.match(/^(\d+)(y|mo|d|min)$/)!;
+  const m = d.match(/^(\d+)(y|mo|d|min)$/);
+  if (!m) return d;
+  const [, n, unit] = m;
   const [one, many] = t[unit as 'y' | 'mo' | 'd' | 'min'].split('|');
   return `${n} ${n === '1' ? one : many}`;
 }

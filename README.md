@@ -59,6 +59,24 @@ Any element with `data-keksi-open` reopens the settings. Put one in the footer:
 <button type="button" data-keksi-open>Evästeasetukset</button>
 ```
 
+**Necessary cookies** from your framework or own code, such as a session, are listed under "Necessary". Find them
+with the scanner, which visits the site without consent:
+
+```sh
+npx keksi scan https://staging.example.fi
+```
+
+It writes `keksi.cookies.json`, with purposes for common cookies filled in. Write the rest, then import the file:
+
+```ts
+import necessary from './keksi.cookies.json' with { type: 'json' };
+
+export default defineConfig({ ga: 'G-XXXXXXX', necessary });
+```
+
+Rerunning keeps your purposes. `keksi scan <url> --check` fails when there are new entries, for CI. The scanner only
+lists; it never blocks anything. Cookies set after login aren't visited, so add those by hand.
+
 **Cookie policy page:** `<CookieTable config={config} />` from `keksi/astro`, or `cookieTable(config)` for an HTML
 string.
 

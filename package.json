@@ -29,6 +29,10 @@
     "./sveltekit": {
       "types": "./dist/sveltekit.d.ts",
       "default": "./dist/sveltekit.js"
+    },
+    "./scan": {
+      "types": "./dist/scan.d.ts",
+      "default": "./dist/scan.js"
     }
   },
   "scripts": {
@@ -52,5 +56,8 @@
     "happy-dom": "^21.0.4",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"
+  },
+  "bin": {
+    "keksi": "./dist/cli.js"
   }
 }

@@ -1,4 +1,5 @@
 import { defineConfig } from 'keksi';
+import necessary from './keksi.cookies.json' with { type: 'json' };
 
 export default defineConfig({
   ga: 'G-TEST123',
@@ -6,4 +7,5 @@ export default defineConfig({
   meta: '1234567890',
   youtube: true,
   policyUrl: '/evasteet',
+  necessary,
 });

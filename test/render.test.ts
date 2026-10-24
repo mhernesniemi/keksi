@@ -40,13 +40,31 @@ describe('render', () => {
   it('generates the cookie policy table', () => {
     const html = cookieTable({ ga: 'G-1', googleAds: 'AW-1', youtube: true });
     expect(html).toContain('<h2>Välttämättömät</h2>');
-    expect(html).toContain('<code>keksi</code></td><td>1 vuosi</td><td>Tämä sivusto</td>');
+    expect(html).toContain('<code>keksi</code></td><td>Tallentaa evästevalintasi.</td><td>1 vuosi</td><td>Tämä sivusto</td>');
     expect(html).toContain('<code>_ga</code></td><td>2 vuotta</td>');
     expect(html).toContain('<code>IDE</code></td><td>13 kuukautta</td><td>doubleclick.net</td>');
     expect(html).toContain('(localStorage)');
     expect(html).toContain('tietosuojakehyksen (DPF)');
     expect(html).not.toContain('Meta Pixel');
     expect(cookieTable({ ga: 'G-1' }, { lang: 'en', headingLevel: 3 })).toContain('<h3>Analytics</h3>');
+  });
+
+  it('lists necessary cookies with their purpose', () => {
+    const config = {
+      ga: 'G-1',
+      necessary: [
+        { name: 'session', duration: 'session', purpose: { fi: 'Kirjautuminen', en: 'Login' } },
+        { name: 'theme', duration: 'persistent', storage: 'localStorage' as const, purpose: { fi: '' } },
+      ],
+    };
+    const html = cookieTable(config);
+    expect(html).toContain('<th scope="col">Tarkoitus</th>');
+    expect(html).toContain('<code>keksi</code></td><td>Tallentaa evästevalintasi.</td><td>1 vuosi</td>');
+    expect(html).toContain('<code>session</code></td><td>Kirjautuminen</td><td>istunto</td>');
+    expect(html).toContain('<code>theme</code> (localStorage)</td><td></td><td>kunnes poistetaan</td>');
+    expect(cookieTable(config, { lang: 'sv' })).toContain('<td>Kirjautuminen</td>');
+    expect(renderKeksi(config)).toContain('<code>session</code>');
+    expect(version(config)).toBe(version({ ga: 'G-1' }));
   });
 
   it('changes the version only when providers change', () => {

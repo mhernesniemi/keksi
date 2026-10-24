@@ -1,0 +1,32 @@
+[
+  {
+    "name": "sveltekit:history-info",
+    "duration": "session",
+    "storage": "sessionStorage",
+    "purpose": {
+      "en": "Restores scroll position and page state when you navigate back.",
+      "fi": "Palauttaa vierityskohdan ja sivun tilan, kun palaat takaisin.",
+      "sv": "Återställer scrollposition och sidans läge när du går tillbaka."
+    }
+  },
+  {
+    "name": "sveltekit:snapshot",
+    "duration": "session",
+    "storage": "sessionStorage",
+    "purpose": {
+      "en": "Restores scroll position and page state when you navigate back.",
+      "fi": "Palauttaa vierityskohdan ja sivun tilan, kun palaat takaisin.",
+      "sv": "Återställer scrollposition och sidans läge när du går tillbaka."
+    }
+  },
+  {
+    "name": "sveltekit:navigation-snapshot",
+    "duration": "session",
+    "storage": "sessionStorage",
+    "purpose": {
+      "en": "Restores scroll position and page state when you navigate back.",
+      "fi": "Palauttaa vierityskohdan ja sivun tilan, kun palaat takaisin.",
+      "sv": "Återställer scrollposition och sidans läge när du går tillbaka."
+    }
+  }
+]
