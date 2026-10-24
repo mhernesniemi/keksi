@@ -1,7 +1,7 @@
 // Zero specificity, so any site rule wins; only link underlines are stronger, to survive CSS resets. Theme with --keksi-bg, --keksi-fg, --keksi-line, --keksi-radius, --keksi-focus.
 export const css = [
   ':where(.keksi,.keksi-policy){--_bg:var(--keksi-bg,#fff);--_fg:var(--keksi-fg,#1b1b1b);--_line:var(--keksi-line,#e3e3e3);--_soft:color-mix(in srgb,var(--_fg) 4%,var(--_bg));--_r:var(--keksi-radius,8px)}',
-  ':where(.keksi){box-sizing:border-box;background:var(--_bg);color:var(--_fg);font:inherit;font-size:14px;line-height:1.5;border:1px solid var(--_line);border-radius:var(--_r);box-shadow:0 8px 32px #0000002e}',
+  ':where(.keksi){box-sizing:border-box;background:var(--_bg);color:var(--_fg);font:inherit;font-size:14px;line-height:1.5;border:1px solid var(--_line);--_line:var(--keksi-line,#d4d4d8);border-radius:var(--_r);box-shadow:0 0 0 1px #0000000d,0 4px 12px #00000014,0 20px 56px #0000003d}',
   ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem;display:flex;flex-direction:column;max-width:34rem;max-height:calc(100vh - 2rem);margin-inline:auto;overflow:hidden}',
   ':where(.keksi,.keksi-main,.keksi-settings)[hidden]{display:none}',
   ':where(.keksi-main,.keksi-settings){display:flex;flex-direction:column;min-height:0;margin:0}',
@@ -17,8 +17,8 @@ export const css = [
   ':where(.keksi) :where(a){color:inherit}',
   '.keksi a{text-decoration:underline}',
   ':where(.keksi-actions){display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.5rem;padding:.75rem 1.25rem;background:var(--_soft)}',
-  ':where(.keksi-btn){min-width:7.5rem;font:inherit;font-weight:600;padding:.5rem 1rem;border:1px solid var(--_fg);border-radius:calc(var(--_r) - 2px);background:var(--_bg);color:var(--_fg);cursor:pointer}',
-  ':where(.keksi-btn:hover){background:var(--_fg);color:var(--_bg)}',
+  ':where(.keksi-btn){min-width:7.5rem;font:inherit;font-weight:600;padding:.5rem 1rem;border:1px solid var(--_fg);border-radius:calc(var(--_r) - 2px);background:var(--_fg);color:var(--_bg);cursor:pointer}',
+  ':where(.keksi-btn:hover){border-color:transparent;background:color-mix(in srgb,var(--_fg) 80%,var(--_bg))}',
   ':where(.keksi-text){margin-right:auto;padding:.5rem .25rem;font:inherit;border:0;background:none;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}',
   '@media (max-width:30rem){:where(.keksi-btn){flex:1 1 auto}}',
   ':where(.keksi,keksi-youtube) :where(button,a,input,summary):focus-visible{outline:3px solid var(--keksi-focus,#2563eb);outline-offset:2px}',
