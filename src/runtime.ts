@@ -112,7 +112,8 @@ export function boot(d: RuntimeData, w: Window & typeof globalThis = window): Ke
 
   function load(c: Consent): void {
     const ids = [...(c.analytics ? d.ga : []), ...(c.marketing ? d.ads : [])].filter((id) => !configured.has(id));
-    if (ids.length) {
+    // Updates loaded tags too, e.g. marketing turned on later with GA already running.
+    if (ids.length || gtagLoaded) {
       const m = c.marketing ? 'granted' : 'denied';
       const cmds = [
         args('consent', 'update', {

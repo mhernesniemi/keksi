@@ -80,6 +80,17 @@ describe('runtime', () => {
     expect(commands(w).filter((c) => c.startsWith('config'))).toEqual(['config G-TEST', 'config AW-1']);
   });
 
+  it('updates Google consent when marketing is added later without Google Ads', () => {
+    const c: KeksiConfig = { ga: 'G-TEST', meta: '42' };
+    const w = new HappyWindow({ url: 'https://www.example.fi/' }) as unknown as Window & typeof globalThis;
+    w.document.body.innerHTML = renderKeksi(c).replace(/<script[\s\S]*<\/script>/, '');
+    const api = boot(runtimeData(c, 'fi'), w);
+    api.save({ analytics: true });
+    api.save({ marketing: true });
+    const updates = (w.dataLayer as IArguments[]).filter((a) => a[1] === 'update').map((a) => a[2]);
+    expect(updates.at(-1)).toMatchObject({ analytics_storage: 'granted', ad_storage: 'granted' });
+  });
+
   it('loads at once for a returning visitor', () => {
     const { scripts, banner } = setup(`keksi=${data.v}.x.abc.a`);
     expect(banner().hidden).toBe(true);
