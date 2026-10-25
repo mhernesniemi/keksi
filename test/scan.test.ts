@@ -41,7 +41,7 @@ describe('scan helpers', () => {
 });
 
 describe('scan', () => {
-  it('lists what the site stores without consent, minus keksi and trackers', async () => {
+  it('lists what the site stores without consent, minus keksi, with trackers apart', async () => {
     const server = createServer((req, res) => {
       const cookies =
         req.url === '/about'
@@ -53,7 +53,8 @@ describe('scan', () => {
     await new Promise<void>((r) => server.listen(0, r));
     const url = `http://localhost:${(server.address() as AddressInfo).port}/`;
     try {
-      const found = await scan(url);
+      const { necessary: found, trackers } = await scan(url);
+      expect(trackers.map((c) => c.name)).toEqual(['_ga']);
       expect(found.map((c) => [c.name, c.duration, c.storage ?? 'cookie']).sort()).toEqual([
         ['csrftoken', '7d', 'cookie'],
         ['session', 'session', 'cookie'],

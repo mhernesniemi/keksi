@@ -61,8 +61,15 @@ export function durationOf(expires: number, now = Date.now() / 1000): string {
   return `${Math.max(1, Math.round(minutes))}min`;
 }
 
-/** Visits the site without consent and returns what it stores, minus keksi's own and known trackers. */
-export async function scan(url: string, { pages = 20, cookieName = 'keksi' }: ScanOptions = {}): Promise<NecessaryCookie[]> {
+export interface ScanResult {
+  /** What the site stores without consent, minus keksi's own cookie. Each needs a reviewed purpose. */
+  necessary: NecessaryCookie[];
+  /** Known tracker cookies set without consent, which means something loads before consent. */
+  trackers: NecessaryCookie[];
+}
+
+/** Visits the site without consent and returns what it stores. */
+export async function scan(url: string, { pages = 20, cookieName = 'keksi' }: ScanOptions = {}): Promise<ScanResult> {
   const { chromium } = await import('@playwright/test');
   const browser = await chromium.launch();
   const origin = new URL(url).origin;
@@ -99,10 +106,13 @@ export async function scan(url: string, { pages = 20, cookieName = 'keksi' }: Sc
   } finally {
     await browser.close();
   }
-  return [...found.values()]
-    .filter((c) => c.name !== cookieName && !matches(trackerNames, c.name))
-    .filter((c) => !c.host || !trackerHosts.some((t) => c.host === t || c.host!.endsWith(`.${t}`)))
-    .map((c) => ({ ...c, purpose: purposeOf(c.name) ?? { en: '', fi: '', sv: '' } }));
+  const all = [...found.values()].filter((c) => c.name !== cookieName);
+  const tracker = (c: NecessaryCookie) =>
+    matches(trackerNames, c.name) || (!!c.host && trackerHosts.some((t) => c.host === t || c.host!.endsWith(`.${t}`)));
+  return {
+    necessary: all.filter((c) => !tracker(c)).map((c) => ({ ...c, purpose: purposeOf(c.name) ?? { en: '', fi: '', sv: '' } })),
+    trackers: all.filter(tracker),
+  };
 }
 
 const key = (c: NecessaryCookie) => `${c.storage ?? 'cookie'}:${c.name}`;
