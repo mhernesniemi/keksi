@@ -77,8 +77,11 @@ import necessary from './keksi.cookies.json' with { type: 'json' };
 export default defineConfig({ ga: 'G-XXXXXXX', necessary });
 ```
 
-Rerunning keeps your purposes. `keksi scan <url> --check` fails when there are new entries, for CI. The scanner only
-lists; it never blocks anything. Cookies set after login aren't visited, so add those by hand.
+Rerunning keeps your purposes. Only storage the site needs to work belongs here, so review each entry. Known tracker
+cookies are reported separately as errors: they mean something loads before consent.
+
+`keksi scan <url> --check` fails when there are new entries or tracker cookies, for CI. The scanner only lists; it
+never blocks anything. Cookies set after login aren't visited, so add those by hand.
 
 **Cookie policy page:** `<CookieTable config={config} />` from `keksi/astro`, or `cookieTable(config)` for an HTML
 string.
@@ -139,7 +142,7 @@ export default defineConfig({
 - First-party `cookies` are deleted on withdrawal; `*` works as a wildcard. Add `host` to ones set on the provider's
   domain.
 - `hosts` are what `watchTracking` checks for.
-- Adding a provider asks returning visitors again.
+- Adding a provider or changing its category asks returning visitors again.
 
 If the provider needs setup code, leave out `script` and load it yourself:
 
@@ -180,6 +183,8 @@ test('nothing tracks before consent', async ({ page }) => {
 await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 ```
 
+`check()` covers cookies, localStorage and sessionStorage. What's in `necessary` is allowed.
+
 ## Customizing
 
 - **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
@@ -189,6 +194,8 @@ await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 - **CSP:** pass `nonce`.
 - **Other frameworks:** `renderKeksi(config, { lang })` returns the HTML to put after `<body>`.
 - **Consent cookie:** `cookie: { name, domain, days }`. Kept for 365 days by default.
+- **Asking again:** adding or removing providers does it by itself. For other changes, such as a reworded purpose,
+  bump `consentVersion: '2'`.
 
 ## Legal basis
 
