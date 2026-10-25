@@ -103,8 +103,13 @@ describe('render', () => {
     expect(version(config)).not.toBe(version({}));
   });
 
-  it('changes the version only when providers change', () => {
+  it('changes the version when providers or consentVersion change', () => {
     expect(version({ ga: 'G-1' })).toBe(version({ ga: ['G-2', 'G-3'] }));
     expect(version({ ga: 'G-1' })).not.toBe(version({ ga: 'G-1', meta: '1' }));
+    expect(version({ ga: 'G-1' })).not.toBe(version({ ga: 'G-1', consentVersion: '2' }));
+    const custom = (category: 'analytics' | 'marketing') => ({
+      providers: [{ name: 'X', company: 'X', privacyPolicy: '/', category, purpose: 'x', cookies: [] }],
+    });
+    expect(version(custom('analytics'))).not.toBe(version(custom('marketing')));
   });
 });

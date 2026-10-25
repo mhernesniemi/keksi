@@ -41,10 +41,12 @@ export function textsFor(config: KeksiConfig, locale: Locale): Texts {
   return { ...texts[locale], ...config.texts?.[locale] };
 }
 
-/** Changes when a provider is added or removed, which asks everyone again. Ids and texts can change freely. */
+/** Changes when a provider is added, removed or recategorized, or `consentVersion` changes, which asks everyone again. */
 export function version(config: KeksiConfig): string {
   let h = 0x811c9dc5;
-  for (const ch of activeProviders(config).map((p) => p.id).join()) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193);
+  const key = activeProviders(config).map((p) => (p.id.startsWith('custom:') ? `${p.id}:${p.category}` : p.id));
+  if (config.consentVersion) key.push(`v:${config.consentVersion}`);
+  for (const ch of key.join()) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193);
   return (h >>> 0).toString(36);
 }
 

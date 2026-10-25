@@ -24,6 +24,8 @@ export interface KeksiConfig {
     domain?: string;
     days?: number;
   };
+  /** Bump to ask everyone again, e.g. after rewording a purpose. Adding or removing providers does this by itself. */
+  consentVersion?: string;
   /** Providers keksi doesn't have built in, e.g. one client's chat widget. */
   providers?: CustomProvider[];
   /** Cookies your site or framework sets without consent, usually from `keksi scan`. Listed under "Necessary". */
