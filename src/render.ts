@@ -18,24 +18,22 @@ export function renderKeksi(config: KeksiConfig, { lang = 'fi', nonce }: RenderO
   const cats = categoriesOf(config);
   if (!cats.length) return '';
   const t = textsFor(config, lang);
-  const active = activeProviders(config);
   const policy = policyOf(config, lang);
   const n = nonce ? ` nonce="${e(nonce)}"` : '';
   const btn = (action: string, label: string, type = 'button') =>
     `<button type="${type}" class="keksi-btn" data-keksi="${action}">${e(label)}</button>`;
-  const uses = cats
-    .map((c) => `<li><strong>${e(t[c])}:</strong> ${e(active.filter((p) => p.category === c).map((p) => p.name).join(', '))}</li>`)
-    .join('');
+  const and = new Intl.ListFormat(lang, { type: 'conjunction' });
+  const uses = and.format(cats.map((c) => t[`${c}Use`]));
+  const links = e(policy ? t.links : t.linksNoPolicy)
+    .replace(/\[(.+?)\]/, (_, s) => `<a href="${e(policy ?? '')}">${s}</a>`)
+    .replace(/\{(.+?)\}/, (_, s) => `<button type="button" class="keksi-link" data-keksi-open>${s}</button>`);
   const json = JSON.stringify(runtimeData(config, lang)).replace(/</g, '\\u003c');
 
   return (
     `<style${n}>${css}</style>` +
-    `<section id="keksi-banner" class="keksi" aria-labelledby="keksi-title" hidden>` +
-    `<div class="keksi-main"><div class="keksi-head"><h2 id="keksi-title">${e(t.title)}</h2></div>` +
-    `<div class="keksi-body"><p>${e(t.intro)}</p><ul>${uses}</ul>` +
-    `<p>${e(t.change)}${policy ? ` <a href="${e(policy)}">${e(t.more)}</a>` : ''}</p></div>` +
-    `<div class="keksi-actions"><button type="button" class="keksi-text" data-keksi-open>${e(t.settings)}</button>` +
-    `${btn('reject', t.reject)}${btn('accept', t.accept)}</div></div>` +
+    `<section id="keksi-banner" class="keksi" aria-label="${e(t.title)}" hidden>` +
+    `<div class="keksi-main"><div class="keksi-body"><p>${e(t.intro).replace('{uses}', e(uses)).replace(/\*(.+?)\*/, '<strong>$1</strong>')} ${links}</p></div>` +
+    `<div class="keksi-actions">${btn('accept', t.accept)}${btn('reject', t.reject)}</div></div>` +
     `<form id="keksi-settings" class="keksi-settings" aria-labelledby="keksi-settings-title" hidden>` +
     `<div class="keksi-head"><h2 id="keksi-settings-title">${e(t.settingsTitle)}</h2>` +
     `<button type="button" class="keksi-close" data-keksi="close" aria-label="${e(t.close)}">×</button></div>` +

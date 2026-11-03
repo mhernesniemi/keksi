@@ -187,10 +187,11 @@ await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 
 ## Customizing
 
-- **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`, `--keksi-line`,
-  `--keksi-radius`, `--keksi-focus`.
+- **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`,
+  `--keksi-accent` (buttons and switches), `--keksi-line`, `--keksi-radius`, `--keksi-focus`.
 - **Language:** follows the page's language, otherwise Finnish. Pass `lang` to set it.
-- **Texts:** `texts: { fi: { intro: '…' } }`.
+- **Texts:** `texts: { fi: { intro: '…' } }`. In `intro`, `*…*` is bold and `{uses}` is the purposes in use, from
+  `analyticsUse` and `marketingUse`. In `links`, `[…]` links to the cookie policy and `{…}` opens the settings.
 - **CSP:** pass `nonce`.
 - **Other frameworks:** `renderKeksi(config, { lang })` returns the HTML to put after `<body>`.
 - **Consent cookie:** `cookie: { name, domain, days }`. Kept for 365 days by default.
@@ -216,6 +217,7 @@ third-party cookies.
 ```sh
 pnpm install
 pnpm build      # prints the runtime size
+pnpm preview    # styled mock site on :4400, rebuilt from src/ on every refresh
 pnpm test
 pnpm test:e2e   # Astro and SvelteKit examples
 ```

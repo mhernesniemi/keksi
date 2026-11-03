@@ -60,7 +60,7 @@ export function consentSuite(config: KeksiConfig): void {
   test('settings save single categories', async ({ page }) => {
     const tracking = watchTracking(page, config);
     await page.goto('/');
-    await page.getByRole('button', { name: 'Asetukset', exact: true }).click();
+    await page.getByRole('button', { name: 'muokkaa asetuksia', exact: true }).click();
     const settings = page.getByRole('form', { name: 'Evästeasetukset' });
     await settings.getByRole('switch', { name: 'Analytiikka' }).check();
     await settings.getByRole('button', { name: 'Tallenna valinnat' }).click();
@@ -112,7 +112,7 @@ export function consentSuite(config: KeksiConfig): void {
 
   test('Escape returns from the settings to the banner without deciding', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Asetukset', exact: true }).click();
+    await page.getByRole('button', { name: 'muokkaa asetuksia', exact: true }).click();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('form', { name: 'Evästeasetukset' })).toBeHidden();
     await expect(page.getByRole('region', { name: 'Evästeet' })).toBeVisible();

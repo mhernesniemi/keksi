@@ -10,9 +10,8 @@ describe('render', () => {
 
   it('lists the providers per category on the first layer', () => {
     const html = renderKeksi({ ga: 'G-1', googleAds: 'AW-1', meta: '1', policyUrl: '/evasteet' });
-    expect(html).toContain('<li><strong>Analytiikka:</strong> Google Analytics</li>');
-    expect(html).toContain('<li><strong>Markkinointi:</strong> Google Ads, Meta Pixel</li>');
-    expect(html).toContain('<a href="/evasteet">Lue lisää</a>');
+    expect(html).toContain('<p><strong>Käytämme evästeitä</strong> analytiikkaan ja markkinointiin vain, jos hyväksyt. Lue');
+    expect(html).toContain('Lue <a href="/evasteet">evästekäytäntömme</a> tai <button type="button" class="keksi-link" data-keksi-open>muokkaa asetuksia</button>.');
     expect(html).toContain('data-keksi="reject"');
     expect(html).toMatch(/<section id="keksi-banner"[^>]*hidden>/);
   });
@@ -69,11 +68,10 @@ describe('render', () => {
 
   it('discloses PostHog, with the US transfer in the settings for the US host', () => {
     const eu = renderKeksi({ posthog: { key: 'phc_1' } }, { lang: 'en' });
-    expect(eu).toContain('<li><strong>Analytics:</strong> PostHog</li>');
+    expect(eu).toContain('<p><strong>We use cookies</strong> for analytics only if you accept. You can also <button');
     expect(eu).toContain('<code>ph_*_posthog</code>');
     expect(eu.replace(/<script[\s\S]*$/, '')).not.toContain('United States');
     const us = renderKeksi({ posthog: { key: 'phc_1', host: 'https://us.i.posthog.com' } }, { lang: 'en' });
-    expect(us).toContain('<p>You can change your choice at any time.');
     expect(us).toContain('<p>Data is transferred to the United States.</p>');
   });
 
@@ -97,7 +95,8 @@ describe('render', () => {
       ],
     };
     const html = renderKeksi(config, { lang: 'sv' });
-    expect(html).toContain('<li><strong>Marknadsföring:</strong> Leadfeeder</li>');
+    expect(html).toContain('<strong>Vi använder kakor</strong> för marknadsföring endast om du godkänner.');
+    expect(html).toContain('<h4>Leadfeeder</h4>');
     expect(html).toContain('<p>Yritysten tunnistus</p>');
     expect(cookieTable(config)).toContain('<code>_lfa</code></td><td>2 vuotta</td>');
     expect(version(config)).not.toBe(version({}));
