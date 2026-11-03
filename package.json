@@ -48,6 +48,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:e2e": "pnpm -r --filter './examples/*' test:e2e"
