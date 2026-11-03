@@ -188,7 +188,7 @@ await context.addCookies([consentCookie(config, baseURL, { analytics: true })]);
 ## Customizing
 
 - **Styles** have zero specificity, so your CSS wins. Variables: `--keksi-bg`, `--keksi-fg`,
-  `--keksi-accent` (buttons and switches), `--keksi-line`, `--keksi-radius`, `--keksi-focus`.
+  `--keksi-accent` (buttons and switches, violet by default), `--keksi-line`, `--keksi-radius`, `--keksi-focus`.
 - **Language:** follows the page's language, otherwise Finnish. Pass `lang` to set it.
 - **Texts:** `texts: { fi: { intro: '…' } }`. In `intro`, `*…*` is bold and `{uses}` is the purposes in use, from
   `analyticsUse` and `marketingUse`. In `links`, `[…]` links to the cookie policy and `{…}` opens the settings.

@@ -1,6 +1,6 @@
 // Zero specificity, so any site rule wins; only link underlines are stronger, to survive CSS resets. Theme with --keksi-bg, --keksi-fg, --keksi-accent, --keksi-line, --keksi-radius, --keksi-focus.
 export const css = [
-  ':where(.keksi,.keksi-policy){--_bg:var(--keksi-bg,#fff);--_fg:var(--keksi-fg,#1b1b1b);--_line:var(--keksi-line,#e4e4e7);--_accent:var(--keksi-accent,var(--_fg));--_muted:color-mix(in srgb,var(--_fg) 72%,var(--_bg));--_soft:color-mix(in srgb,var(--_fg) 4%,var(--_bg));--_r:var(--keksi-radius,8px)}',
+  ':where(.keksi,.keksi-policy){--_bg:var(--keksi-bg,#fff);--_fg:var(--keksi-fg,#1b1b1b);--_line:var(--keksi-line,#e4e4e7);--_accent:var(--keksi-accent,#5b21f6);--_muted:color-mix(in srgb,var(--_fg) 72%,var(--_bg));--_soft:color-mix(in srgb,var(--_fg) 4%,var(--_bg));--_r:var(--keksi-radius,8px)}',
   ':where(.keksi){box-sizing:border-box;background:var(--_bg);color:var(--_fg);font:inherit;font-size:14px;line-height:1.5;border:1px solid var(--_line);border-radius:var(--_r);box-shadow:0 1px 2px #0000000a,0 8px 28px #00000014}',
   ':where(.keksi){position:fixed;z-index:2147483000;inset:auto 1rem 1rem auto;display:flex;flex-direction:column;width:min(25rem,calc(100% - 2rem));max-height:calc(100vh - 2rem);overflow:hidden}',
   ':where(.keksi,.keksi-main,.keksi-settings)[hidden]{display:none}',

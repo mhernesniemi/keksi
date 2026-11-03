@@ -35,7 +35,6 @@ async function load() {
 
 const css = `
 *{box-sizing:border-box}
-:root{--keksi-accent:#5b21f6}
 body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;background:#fafaf9;line-height:1.6}
 a{color:inherit}
 .bar{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.5rem 1rem;background:#0f172a;color:#e2e8f0;font-size:13px}
